@@ -1,8 +1,11 @@
-﻿using System;
+﻿using _6502Emulator.Instructions;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace _6502Emulator
 {
@@ -45,7 +48,13 @@ namespace _6502Emulator
             ['C'] = 12,
             ['D'] = 13,
             ['E'] = 14,
-            ['F'] = 15
+            ['F'] = 15,
+            ['a'] = 10,
+            ['b'] = 11,
+            ['c'] = 12,
+            ['d'] = 13,
+            ['e'] = 14,
+            ['f'] = 15
         };
 
         public static Dictionary<InstructionType, Dictionary<AddressingModes, byte>> InstructionTypeToOpCode = new Dictionary<InstructionType, Dictionary<AddressingModes, byte>>()
@@ -348,11 +357,13 @@ namespace _6502Emulator
             [InstructionType.JMP] = new Dictionary<AddressingModes, byte>()
             {
                 [AddressingModes.Absolute] = 0x4C,
-                [AddressingModes.Indirect] = 0x6C
+                [AddressingModes.Indirect] = 0x6C,
+                [AddressingModes.JumpLabel] = 0x4C,
             },
             [InstructionType.JSR] = new Dictionary<AddressingModes, byte>()
             {
-                [AddressingModes.Absolute] = 0x20  
+                [AddressingModes.Absolute] = 0x20,
+                [AddressingModes.JumpLabel] = 0x20
             },
             [InstructionType.RTI] = new Dictionary<AddressingModes, byte>()
             {
@@ -391,13 +402,44 @@ namespace _6502Emulator
             #endregion
         };
 
-        public static string HexDump(List<IInstruction> instructions)
+        public static string GetAddresses(List<BaseInstruction> instructions)
         {
             StringBuilder result = new StringBuilder();
+
             foreach (var instruction in instructions)
             {
                 //append op code and get all parameters
 
+                var byteOffsetString = Convert.ToString(instruction.ByteOffset + InitialOffset, 16).PadLeft(4, '0');
+
+                var text = $"${byteOffsetString}";
+
+                result.Append(text);
+                result.Append("\n");
+            }
+
+
+            return result.ToString();
+        }
+
+        public static List<string> GetAddressesList(List<BaseInstruction> instructions)
+        {
+            List<string> result = new List<string>();
+            foreach (var instruction in instructions)
+            {
+                var byteOffsetString = Convert.ToString(instruction.ByteOffset + InitialOffset, 16).PadLeft(4, '0');
+
+                var text = $"${byteOffsetString}";
+                result.Add(text);
+            }
+
+            return result;
+        }
+        public static string HexDumpStr(List<BaseInstruction> instructions)
+        {
+            StringBuilder result = new StringBuilder();
+            foreach (var instruction in instructions)
+            {
                 result.Append(Convert.ToString(instruction.OpCode, 16).PadLeft(2, '0'));
                 foreach (var item in instruction.Parameters)
                 {
@@ -409,7 +451,41 @@ namespace _6502Emulator
 
             return result.ToString().Trim();
         }
+        public static List<string> HexDumpList(List<BaseInstruction> instructions)
+        {
+            List<string> hexdump = new List<string>();
+            foreach (var instruction in instructions)
+            {
+                StringBuilder line = new StringBuilder();
+
+                line.Append(Convert.ToString(instruction.OpCode, 16).PadLeft(2, '0'));
+                foreach (var item in instruction.Parameters)
+                {
+                    line.Append(" ");
+                    line.Append(Convert.ToString(item, 16).PadLeft(2, '0'));
+                }
+
+                hexdump.Add(line.ToString());
+            }
+
+            return hexdump;
+        }
+        public static string DissassemblyStr(List<string> dissassembly)
+        {
+            StringBuilder final = new StringBuilder();
+       
+            foreach(var item in dissassembly)
+            {
+                final.Append(item);
+                final.Append("\n");
+            }
+            return final.ToString();
+        }
 
         public static int MemorySize = 65536;
+
+        public static int InitialOffset = 0x600;
+
+        public static Font Font;
     }
 }

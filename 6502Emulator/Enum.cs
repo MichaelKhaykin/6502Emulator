@@ -8,6 +8,8 @@ namespace _6502Emulator
 {
     public enum AddressingModes
     {
+        DEFAULTCASE,
+        JumpLabel,
         Implied,
         Relative,
         Accumulator,

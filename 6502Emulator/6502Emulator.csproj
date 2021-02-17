@@ -59,6 +59,7 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Helper.cs" />
+    <Compile Include="HexCodeParser.cs" />
     <Compile Include="Instructions\Arthimetic\SBC.cs" />
     <Compile Include="Instructions\BitManipulation\ASL.cs" />
     <Compile Include="Instructions\BitManipulation\LSR.cs" />
@@ -119,7 +120,7 @@
     <Compile Include="Instructions\Memory\LDY.cs" />
     <Compile Include="Instructions\Other\JMP.cs" />
     <Compile Include="Instructions\Other\JSR.cs" />
-    <Compile Include="Parser.cs" />
+    <Compile Include="AssemblyParser.cs" />
     <Compile Include="PreviewBugs.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -151,6 +152,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="6502Code.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="CorrectAssembly.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

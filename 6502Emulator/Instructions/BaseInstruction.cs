@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 
 namespace _6502Emulator.Instructions
 {
-    public class BaseInstruction : IInstruction
+    public abstract class BaseInstruction : IInstruction
     {
-        public InstructionType Type => throw new Exception();
+        public abstract InstructionType Type { get; }
         public AddressingModes Mode { get; set; }
         public List<byte> Parameters { get; set; }
+        public abstract byte OpCode { get; }
+        public short ByteOffset { get; init; }
         public int InstructionNumber { get; init; }
-        public byte OpCode => throw new Exception();
     }
 }

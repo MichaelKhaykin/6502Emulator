@@ -6,24 +6,24 @@ using System.Threading.Tasks;
 
 namespace _6502Emulator.Instructions.Arthimetic
 {
-    public class BNE : IInstruction
+    public class BNE : BaseInstruction
     {
-        public InstructionType Type
+        public override InstructionType Type
         {
             get
             {
                 return InstructionType.BNE;
             }
         }
-        public byte OpCode
+        public override byte OpCode
         {
             get
             {
                 return Helper.InstructionTypeToOpCode[Type][Mode];
             }
         }
-        public AddressingModes Mode { get; init; }
-        public List<byte> Parameters { get; init; }
-        public int InstructionNumber { get; init; }
+        
+        
+        
     }
 }
