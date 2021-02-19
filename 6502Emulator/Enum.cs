@@ -32,4 +32,14 @@ namespace _6502Emulator
         JSR, LDA, LDX, LDY, LSR, NOP, ORA, PHA, PHP, PLA, PLP, ROL, ROR, RTI,
         RTS, SBC, SEC, SED, SEI, STA, STX, STY, TAX, TAY, TSX, TXA, TXS, TYA
     }
+
+    public enum FlagType
+    {
+        N,
+        Z,
+        C,
+        I,
+        D,
+        V,
+    }
 }

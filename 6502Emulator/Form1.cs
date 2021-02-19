@@ -23,6 +23,8 @@ namespace _6502Emulator
 
             Helper.Font = new Font(FontFamily.GenericMonospace, 14);
 
+            Chip chip = new Chip();
+
         }
 
         private void Display(string file)
@@ -46,17 +48,9 @@ namespace _6502Emulator
             table.Columns.Add("HexDump:");
             table.Columns.Add("Dissassembly:");
 
-            var correctlines = System.IO.File.ReadAllLines("CorrectAssembly.txt");
             for (int i = 0; i < adSplit.Length; i++)
             {
                 table.Rows.Add(adSplit[i], hexSplit[i], disSplit[i]);
-                
-                string currLine = adSplit[i].PadRight(4, ' ') + "    " + hexSplit[i].PadRight(8, ' ') + "  " + disSplit[i];
-                
-                if(correctlines[i].ToLower() != currLine.ToLower())
-                {
-
-                }
             }
             
             dataGridView1.DataSource = table;
@@ -71,12 +65,21 @@ namespace _6502Emulator
             foreach (DataGridViewColumn col in dataGridView1.Columns)
             {
                 col.SortMode = DataGridViewColumnSortMode.NotSortable;
+                col.ReadOnly = true;
             }
 
             dataGridView1.ClearSelection();
 
-            dataGridView1.CellMouseMove += dataGridView1_CellMouseMove;
-            dataGridView1.CellMouseLeave += dataGridView1_CellMouseLeave;
+            dataGridView1.DefaultCellStyle.SelectionBackColor = dataGridView1.DefaultCellStyle.BackColor;
+            dataGridView1.DefaultCellStyle.SelectionForeColor = dataGridView1.DefaultCellStyle.ForeColor;
+            dataGridView1.CellToolTipTextNeeded += DataGridView1_CellToolTipTextNeeded;
+        }
+
+        private void DataGridView1_CellToolTipTextNeeded(object sender, DataGridViewCellToolTipTextNeededEventArgs e)
+        {
+            //e has a row index and cell index we can utilize
+            
+            e.ToolTipText = "Hello";
         }
 
         private void BuildButton_Click(object sender, EventArgs e)
@@ -88,21 +91,6 @@ namespace _6502Emulator
         private void BuildFile_Click(object sender, EventArgs e)
         {
             Display("6502Code.txt");
-        }
-
-        private void dataGridView1_CellMouseMove(object sender, DataGridViewCellMouseEventArgs e)
-        {
-            if (e.RowIndex < 0) return;
-            if (e.ColumnIndex != 2) return;
-
-            dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Style.BackColor = Color.Blue;
-        }
-        private void dataGridView1_CellMouseLeave(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex < 0) return;
-            if (e.ColumnIndex != 2) return;
-
-            dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Style.BackColor = Color.White;
         }
     }
 }
