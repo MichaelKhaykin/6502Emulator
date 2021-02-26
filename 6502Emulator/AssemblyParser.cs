@@ -20,66 +20,6 @@ namespace _6502Emulator
 
         Dictionary<AddressingModes, Func<string, BaseInstruction, bool>> addressModeParsingMethods = new Dictionary<AddressingModes, Func<string, BaseInstruction, bool>>();
 
-        Dictionary<InstructionType, Func<short, BaseInstruction>> InstructionTypeToInstruction = new Dictionary<InstructionType, Func<short, BaseInstruction>>()
-        {
-            [InstructionType.ADC] = new Func<short, BaseInstruction>((byteOffset) => new ADC() { ByteOffset = byteOffset }),
-            [InstructionType.AND] = new Func<short, BaseInstruction>((byteOffset) => new AND() { ByteOffset = byteOffset }),
-            [InstructionType.BIT] = new Func<short, BaseInstruction>((byteOffset) => new BIT() { ByteOffset = byteOffset }),
-            [InstructionType.ASL] = new Func<short, BaseInstruction>((byteOffset) => new ASL() { ByteOffset = byteOffset }),
-            [InstructionType.BCC] = new Func<short, BaseInstruction>((byteOffset) => new BCC() { ByteOffset = byteOffset }),
-            [InstructionType.BCS] = new Func<short, BaseInstruction>((byteOffset) => new BCS() { ByteOffset = byteOffset }),
-            [InstructionType.BEQ] = new Func<short, BaseInstruction>((byteOffset) => new BEQ() { ByteOffset = byteOffset }),
-            [InstructionType.BMI] = new Func<short, BaseInstruction>((byteOffset) => new BMI() { ByteOffset = byteOffset }),
-            [InstructionType.BNE] = new Func<short, BaseInstruction>((byteOffset) => new BNE() { ByteOffset = byteOffset }),
-            [InstructionType.BPL] = new Func<short, BaseInstruction>((byteOffset) => new BPL() { ByteOffset = byteOffset }),
-            [InstructionType.BVC] = new Func<short, BaseInstruction>((byteOffset) => new BVC() { ByteOffset = byteOffset }),
-            [InstructionType.BVS] = new Func<short, BaseInstruction>((byteOffset) => new BVS() { ByteOffset = byteOffset }),
-            [InstructionType.BRK] = new Func<short, BaseInstruction>((byteOffset) => new BRK() { ByteOffset = byteOffset }),
-            [InstructionType.CMP] = new Func<short, BaseInstruction>((byteOffset) => new CMP() { ByteOffset = byteOffset }),
-            [InstructionType.CPX] = new Func<short, BaseInstruction>((byteOffset) => new CPX() { ByteOffset = byteOffset }),
-            [InstructionType.CPY] = new Func<short, BaseInstruction>((byteOffset) => new CPY() { ByteOffset = byteOffset }),
-            [InstructionType.DEC] = new Func<short, BaseInstruction>((byteOffset) => new DEC() { ByteOffset = byteOffset }),
-            [InstructionType.EOR] = new Func<short, BaseInstruction>((byteOffset) => new EOR() { ByteOffset = byteOffset }),
-            [InstructionType.CLC] = new Func<short, BaseInstruction>((byteOffset) => new CLC() { ByteOffset = byteOffset }),
-            [InstructionType.SEC] = new Func<short, BaseInstruction>((byteOffset) => new SEC() { ByteOffset = byteOffset }),
-            [InstructionType.CLI] = new Func<short, BaseInstruction>((byteOffset) => new CLI() { ByteOffset = byteOffset }),
-            [InstructionType.SEI] = new Func<short, BaseInstruction>((byteOffset) => new SEI() { ByteOffset = byteOffset }),
-            [InstructionType.CLV] = new Func<short, BaseInstruction>((byteOffset) => new CLV() { ByteOffset = byteOffset }),
-            [InstructionType.CLD] = new Func<short, BaseInstruction>((byteOffset) => new CLD() { ByteOffset = byteOffset }),
-            [InstructionType.SED] = new Func<short, BaseInstruction>((byteOffset) => new SED() { ByteOffset = byteOffset }),
-            [InstructionType.INC] = new Func<short, BaseInstruction>((byteOffset) => new INC() { ByteOffset = byteOffset }),
-            [InstructionType.JMP] = new Func<short, BaseInstruction>((byteOffset) => new JMP() { ByteOffset = byteOffset }),
-            [InstructionType.JSR] = new Func<short, BaseInstruction>((byteOffset) => new JSR() { ByteOffset = byteOffset }),
-            [InstructionType.LDA] = new Func<short, BaseInstruction>((byteOffset) => new LDA() { ByteOffset = byteOffset }),
-            [InstructionType.LDX] = new Func<short, BaseInstruction>((byteOffset) => new LDX() { ByteOffset = byteOffset }),
-            [InstructionType.LDY] = new Func<short, BaseInstruction>((byteOffset) => new LDY() { ByteOffset = byteOffset }),
-            [InstructionType.LSR] = new Func<short, BaseInstruction>((byteOffset) => new LSR() { ByteOffset = byteOffset }),
-            [InstructionType.NOP] = new Func<short, BaseInstruction>((byteOffset) => new NOP() { ByteOffset = byteOffset }),
-            [InstructionType.ORA] = new Func<short, BaseInstruction>((byteOffset) => new ORA() { ByteOffset = byteOffset }),
-            [InstructionType.TAX] = new Func<short, BaseInstruction>((byteOffset) => new TAX() { ByteOffset = byteOffset }),
-            [InstructionType.TXA] = new Func<short, BaseInstruction>((byteOffset) => new TXA() { ByteOffset = byteOffset }),
-            [InstructionType.DEX] = new Func<short, BaseInstruction>((byteOffset) => new DEX() { ByteOffset = byteOffset }),
-            [InstructionType.INX] = new Func<short, BaseInstruction>((byteOffset) => new INX() { ByteOffset = byteOffset }),
-            [InstructionType.TAY] = new Func<short, BaseInstruction>((byteOffset) => new TAY() { ByteOffset = byteOffset }),
-            [InstructionType.TYA] = new Func<short, BaseInstruction>((byteOffset) => new TYA() { ByteOffset = byteOffset }),
-            [InstructionType.DEY] = new Func<short, BaseInstruction>((byteOffset) => new DEY() { ByteOffset = byteOffset }),
-            [InstructionType.INY] = new Func<short, BaseInstruction>((byteOffset) => new INY() { ByteOffset = byteOffset }),
-            [InstructionType.ROL] = new Func<short, BaseInstruction>((byteOffset) => new ROL() { ByteOffset = byteOffset }),
-            [InstructionType.ROR] = new Func<short, BaseInstruction>((byteOffset) => new ROR() { ByteOffset = byteOffset }),
-            [InstructionType.RTI] = new Func<short, BaseInstruction>((byteOffset) => new RTI() { ByteOffset = byteOffset }),
-            [InstructionType.RTS] = new Func<short, BaseInstruction>((byteOffset) => new RTS() { ByteOffset = byteOffset }),
-            [InstructionType.SBC] = new Func<short, BaseInstruction>((byteOffset) => new SBC() { ByteOffset = byteOffset }),
-            [InstructionType.STA] = new Func<short, BaseInstruction>((byteOffset) => new STA() { ByteOffset = byteOffset }),
-            [InstructionType.TXS] = new Func<short, BaseInstruction>((byteOffset) => new TXS() { ByteOffset = byteOffset }),
-            [InstructionType.TSX] = new Func<short, BaseInstruction>((byteOffset) => new TSX() { ByteOffset = byteOffset }),
-            [InstructionType.PHA] = new Func<short, BaseInstruction>((byteOffset) => new PHA() { ByteOffset = byteOffset }),
-            [InstructionType.PLA] = new Func<short, BaseInstruction>((byteOffset) => new PLA() { ByteOffset = byteOffset }),
-            [InstructionType.PHP] = new Func<short, BaseInstruction>((byteOffset) => new PHP() { ByteOffset = byteOffset }),
-            [InstructionType.PLP] = new Func<short, BaseInstruction>((byteOffset) => new PLP() { ByteOffset = byteOffset }),
-            [InstructionType.STX] = new Func<short, BaseInstruction>((byteOffset) => new STX() { ByteOffset = byteOffset }),
-            [InstructionType.STY] = new Func<short, BaseInstruction>((byteOffset) => new STY() { ByteOffset = byteOffset }),
-        };
-
         Dictionary<AddressingModes, List<Regex>> ParseMethods = new Dictionary<AddressingModes, List<Regex>>()
         {
             [AddressingModes.Immediate] = new List<Regex>()
@@ -400,12 +340,18 @@ namespace _6502Emulator
                 }),
             };
         }
-        public List<BaseInstruction> Parse()
-        {
-            string[] lines = System.IO.File.ReadAllLines(code);
-         
-            #region Find and replace defines
 
+        public static string[] GetRidOfCommentsAndEmptyLines(string[] lines)
+        {
+            return lines.Select((x) =>
+            {
+                if (!x.Contains(';')) return x.Trim();
+
+                return x.Substring(0, x.IndexOf(';')).Trim();
+            }).Where((x) => !string.IsNullOrEmpty(x)).ToArray();
+        }
+        public static string[] ReplaceDefines(string[] lines)
+        {
             List<string> linesWithoutDefines = new List<string>();
 
             Dictionary<string, string> defineValues = new Dictionary<string, string>();
@@ -416,36 +362,48 @@ namespace _6502Emulator
                     linesWithoutDefines.Add(line);
                     continue;
                 }
-                
+
                 var splits = line.Split(' ').Where((x) => !string.IsNullOrEmpty(x)).ToArray();
                 defineValues.Add(splits[1], splits[2]);
-
             }
 
-            lines = linesWithoutDefines.ToArray();
-
-            for(int i = 0; i < lines.Length; i++)
+            for (int i = 0; i < linesWithoutDefines.Count; i++)
             {
-                foreach(var defineValue in defineValues)
+                foreach (var defineValue in defineValues)
                 {
-                    if(lines[i].Contains(defineValue.Key))
+                    if (linesWithoutDefines[i].Contains(defineValue.Key))
                     {
-                        lines[i] = lines[i].Replace(defineValue.Key, defineValue.Value);
+                        linesWithoutDefines[i] = linesWithoutDefines[i].Replace(defineValue.Key, defineValue.Value);
                     }
                 }
             }
 
-            #endregion
-
-            #region FixUpInput
-            lines = lines.Select((x) =>
+            return linesWithoutDefines.ToArray();
+        }
+        public static string[] RemoveLabels(string[] lines)
+        {
+            Regex labelRegexMatcher = new Regex("^( ){0,}([^ ]){1,100}[:]( ){0,}$");
+            return lines.Where((x) => !labelRegexMatcher.Match(x).Success).ToArray();
+        }
+        public static Dictionary<string, string> GenerateDefineReplacementTable(string[] lines)
+        {
+            Dictionary<string, string> defineValues = new Dictionary<string, string>();
+            foreach (var line in lines)
             {
-                if (!x.Contains(';')) return x;
+                if (!line.Contains("define")) continue;
+               
+                var splits = line.Split(' ').Where((x) => !string.IsNullOrEmpty(x)).ToArray();
+                defineValues.Add(splits[1], splits[2]);
+            }
 
-                return x.Substring(0, x.IndexOf(';'));
-            }).ToArray();
-            lines = lines.Select((x) => x.Trim()).Where((x) => !string.IsNullOrEmpty(x)).ToArray();
-            #endregion
+            return defineValues;
+        }
+        public List<BaseInstruction> Parse()
+        {
+            string[] lines = System.IO.File.ReadAllLines(code);
+
+            lines = ReplaceDefines(lines);
+            lines = GetRidOfCommentsAndEmptyLines(lines);
 
             Regex labelRegexMatcher = new Regex("^( ){0,}([^ ]){1,100}[:]( ){0,}$");
 
@@ -470,7 +428,8 @@ namespace _6502Emulator
                 var insSize = instructions.Count;
                 foreach (var possibleMatch in possibleMatches)
                 {
-                    var specificCreation = InstructionTypeToInstruction[type](byteCounter);
+                    var specificCreation = Helper.InstructionTypeToInstruction[type](byteCounter);
+                    specificCreation.InstructionNumber = lineNumber;
 
                     bool successful = addressModeParsingMethods[possibleMatch](rest, specificCreation);
 

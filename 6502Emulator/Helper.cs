@@ -1,4 +1,5 @@
 ﻿using _6502Emulator.Instructions;
+using _6502Emulator.Instructions.Arthimetic;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -401,7 +402,6 @@ namespace _6502Emulator
             },
             #endregion
         };
-
         public static string GetAddresses(List<BaseInstruction> instructions)
         {
             StringBuilder result = new StringBuilder();
@@ -421,7 +421,6 @@ namespace _6502Emulator
 
             return result.ToString();
         }
-
         public static List<string> GetAddressesList(List<BaseInstruction> instructions)
         {
             List<string> result = new List<string>();
@@ -487,5 +486,67 @@ namespace _6502Emulator
         public static int InitialOffset = 0x600;
 
         public static Font Font;
+
+        public static Dictionary<InstructionType, Func<short, BaseInstruction>> InstructionTypeToInstruction = new Dictionary<InstructionType, Func<short, BaseInstruction>>()
+        {
+            [InstructionType.ADC] = new Func<short, BaseInstruction>((byteOffset) => new ADC() { ByteOffset = byteOffset }),
+            [InstructionType.AND] = new Func<short, BaseInstruction>((byteOffset) => new AND() { ByteOffset = byteOffset }),
+            [InstructionType.BIT] = new Func<short, BaseInstruction>((byteOffset) => new BIT() { ByteOffset = byteOffset }),
+            [InstructionType.ASL] = new Func<short, BaseInstruction>((byteOffset) => new ASL() { ByteOffset = byteOffset }),
+            [InstructionType.BCC] = new Func<short, BaseInstruction>((byteOffset) => new BCC() { ByteOffset = byteOffset }),
+            [InstructionType.BCS] = new Func<short, BaseInstruction>((byteOffset) => new BCS() { ByteOffset = byteOffset }),
+            [InstructionType.BEQ] = new Func<short, BaseInstruction>((byteOffset) => new BEQ() { ByteOffset = byteOffset }),
+            [InstructionType.BMI] = new Func<short, BaseInstruction>((byteOffset) => new BMI() { ByteOffset = byteOffset }),
+            [InstructionType.BNE] = new Func<short, BaseInstruction>((byteOffset) => new BNE() { ByteOffset = byteOffset }),
+            [InstructionType.BPL] = new Func<short, BaseInstruction>((byteOffset) => new BPL() { ByteOffset = byteOffset }),
+            [InstructionType.BVC] = new Func<short, BaseInstruction>((byteOffset) => new BVC() { ByteOffset = byteOffset }),
+            [InstructionType.BVS] = new Func<short, BaseInstruction>((byteOffset) => new BVS() { ByteOffset = byteOffset }),
+            [InstructionType.BRK] = new Func<short, BaseInstruction>((byteOffset) => new BRK() { ByteOffset = byteOffset }),
+            [InstructionType.CMP] = new Func<short, BaseInstruction>((byteOffset) => new CMP() { ByteOffset = byteOffset }),
+            [InstructionType.CPX] = new Func<short, BaseInstruction>((byteOffset) => new CPX() { ByteOffset = byteOffset }),
+            [InstructionType.CPY] = new Func<short, BaseInstruction>((byteOffset) => new CPY() { ByteOffset = byteOffset }),
+            [InstructionType.DEC] = new Func<short, BaseInstruction>((byteOffset) => new DEC() { ByteOffset = byteOffset }),
+            [InstructionType.EOR] = new Func<short, BaseInstruction>((byteOffset) => new EOR() { ByteOffset = byteOffset }),
+            [InstructionType.CLC] = new Func<short, BaseInstruction>((byteOffset) => new CLC() { ByteOffset = byteOffset }),
+            [InstructionType.SEC] = new Func<short, BaseInstruction>((byteOffset) => new SEC() { ByteOffset = byteOffset }),
+            [InstructionType.CLI] = new Func<short, BaseInstruction>((byteOffset) => new CLI() { ByteOffset = byteOffset }),
+            [InstructionType.SEI] = new Func<short, BaseInstruction>((byteOffset) => new SEI() { ByteOffset = byteOffset }),
+            [InstructionType.CLV] = new Func<short, BaseInstruction>((byteOffset) => new CLV() { ByteOffset = byteOffset }),
+            [InstructionType.CLD] = new Func<short, BaseInstruction>((byteOffset) => new CLD() { ByteOffset = byteOffset }),
+            [InstructionType.SED] = new Func<short, BaseInstruction>((byteOffset) => new SED() { ByteOffset = byteOffset }),
+            [InstructionType.INC] = new Func<short, BaseInstruction>((byteOffset) => new INC() { ByteOffset = byteOffset }),
+            [InstructionType.JMP] = new Func<short, BaseInstruction>((byteOffset) => new JMP() { ByteOffset = byteOffset }),
+            [InstructionType.JSR] = new Func<short, BaseInstruction>((byteOffset) => new JSR() { ByteOffset = byteOffset }),
+            [InstructionType.LDA] = new Func<short, BaseInstruction>((byteOffset) => new LDA() { ByteOffset = byteOffset }),
+            [InstructionType.LDX] = new Func<short, BaseInstruction>((byteOffset) => new LDX() { ByteOffset = byteOffset }),
+            [InstructionType.LDY] = new Func<short, BaseInstruction>((byteOffset) => new LDY() { ByteOffset = byteOffset }),
+            [InstructionType.LSR] = new Func<short, BaseInstruction>((byteOffset) => new LSR() { ByteOffset = byteOffset }),
+            [InstructionType.NOP] = new Func<short, BaseInstruction>((byteOffset) => new NOP() { ByteOffset = byteOffset }),
+            [InstructionType.ORA] = new Func<short, BaseInstruction>((byteOffset) => new ORA() { ByteOffset = byteOffset }),
+            [InstructionType.TAX] = new Func<short, BaseInstruction>((byteOffset) => new TAX() { ByteOffset = byteOffset }),
+            [InstructionType.TXA] = new Func<short, BaseInstruction>((byteOffset) => new TXA() { ByteOffset = byteOffset }),
+            [InstructionType.DEX] = new Func<short, BaseInstruction>((byteOffset) => new DEX() { ByteOffset = byteOffset }),
+            [InstructionType.INX] = new Func<short, BaseInstruction>((byteOffset) => new INX() { ByteOffset = byteOffset }),
+            [InstructionType.TAY] = new Func<short, BaseInstruction>((byteOffset) => new TAY() { ByteOffset = byteOffset }),
+            [InstructionType.TYA] = new Func<short, BaseInstruction>((byteOffset) => new TYA() { ByteOffset = byteOffset }),
+            [InstructionType.DEY] = new Func<short, BaseInstruction>((byteOffset) => new DEY() { ByteOffset = byteOffset }),
+            [InstructionType.INY] = new Func<short, BaseInstruction>((byteOffset) => new INY() { ByteOffset = byteOffset }),
+            [InstructionType.ROL] = new Func<short, BaseInstruction>((byteOffset) => new ROL() { ByteOffset = byteOffset }),
+            [InstructionType.ROR] = new Func<short, BaseInstruction>((byteOffset) => new ROR() { ByteOffset = byteOffset }),
+            [InstructionType.RTI] = new Func<short, BaseInstruction>((byteOffset) => new RTI() { ByteOffset = byteOffset }),
+            [InstructionType.RTS] = new Func<short, BaseInstruction>((byteOffset) => new RTS() { ByteOffset = byteOffset }),
+            [InstructionType.SBC] = new Func<short, BaseInstruction>((byteOffset) => new SBC() { ByteOffset = byteOffset }),
+            [InstructionType.STA] = new Func<short, BaseInstruction>((byteOffset) => new STA() { ByteOffset = byteOffset }),
+            [InstructionType.TXS] = new Func<short, BaseInstruction>((byteOffset) => new TXS() { ByteOffset = byteOffset }),
+            [InstructionType.TSX] = new Func<short, BaseInstruction>((byteOffset) => new TSX() { ByteOffset = byteOffset }),
+            [InstructionType.PHA] = new Func<short, BaseInstruction>((byteOffset) => new PHA() { ByteOffset = byteOffset }),
+            [InstructionType.PLA] = new Func<short, BaseInstruction>((byteOffset) => new PLA() { ByteOffset = byteOffset }),
+            [InstructionType.PHP] = new Func<short, BaseInstruction>((byteOffset) => new PHP() { ByteOffset = byteOffset }),
+            [InstructionType.PLP] = new Func<short, BaseInstruction>((byteOffset) => new PLP() { ByteOffset = byteOffset }),
+            [InstructionType.STX] = new Func<short, BaseInstruction>((byteOffset) => new STX() { ByteOffset = byteOffset }),
+            [InstructionType.STY] = new Func<short, BaseInstruction>((byteOffset) => new STY() { ByteOffset = byteOffset }),
+        };
+
+        public static Dictionary<InstructionType, string> InstructionDescriptions = new Dictionary<InstructionType, string>();
     }
 }

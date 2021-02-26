@@ -1,0 +1,248 @@
+[
+  {
+    "name": "ADC",
+    "description": "Add with Carry"
+  },
+  {
+
+    "name": "AND",
+    "description": "Logical AND"
+  },
+  {
+    "name": "ASL",
+    "description": "Arithmetic Shift Left"
+  },
+  {
+    "name": "BCC",
+    "description": "Branch if Carry Clear"
+  },
+  {
+    "name": "BCS",
+    "description": "Branch if Carry Set"
+  },
+  {
+
+    "name": "BEQ",
+    "description": "Branch if Equal"
+  },
+  {
+    
+    "name": "BIT",
+    "description": "Bit Test",
+  },
+  {
+
+    "name": "BMI",
+    "description": "Branch if Minus"
+  },
+  { 
+    "name": "BNE",
+    "description": "Branch if Not Equal",
+  },
+  {  
+    "name": "BPL",
+    "description": "Branch if Positive",
+  },
+  {
+    "name": "BRK",
+    "description": "Force Interrupt",
+  },
+  {
+
+    "name": "BVC",
+    "description": "Branch if Overflow Clear"
+  },
+  {
+
+    "name": "BVS",
+    "description": "Branch if Overflow Set"
+  },
+  {
+    "name": "CLC",
+    "description": "Clear Carry Flag"
+  },
+  {
+
+    "name": "CLD",
+    "description": "Clear Decimal Mode"
+  },
+  {
+    "name": "CLI",
+    "description": "Clear Interrupt Disable"
+  },
+  {
+    "name": "CLV",
+    "description": "Clear Overflow Flag"
+  },
+  {
+    
+    "name": "CMP",
+    "description": "Compare"
+  },
+  {
+    
+    "name": "CPX",
+    "description": "Compare X Register",
+  },
+  {
+    
+    "name": "CPY",
+    "description": "Compare Y Register"
+  },
+  {
+
+    "name": "DEC",
+    "description": "Decrement Memory"
+  },
+  {
+    "name": "DEX",
+    "description": "Decrement X Register"
+  },
+  {
+    "name": "DEY",
+    "description": "Decrement Y Register"
+  },
+  {  
+    "name": "EOR",
+    "description": "Exclusive OR"
+  },
+  {
+
+    "name": "INC",
+    "description": "Increment Memory"
+  },
+  {  
+    "name": "INX",
+    "description": "Increment X Register", 
+  },
+  {
+    "name": "INY",
+    "description": "Increment Y Register"
+  },
+  {
+    "name": "JMP",
+    "description": "Jump"
+  },
+  {
+    "name": "JSR",
+    "description": "Jump to Subroutine",
+  },
+  {
+    "name": "LDA",
+    "description": "Load Accumulator"
+  },
+  {
+    "name": "LDX",
+    "description": "Load X Register"
+  },
+  {  
+    "name": "LDY",
+    "description": "Load Y Register",
+  },
+  {
+
+    "name": "LSR",
+    "description": "Logical Shift Right"
+  },
+  {
+
+    "name": "NOP",
+    "description": "No Operation"
+  },
+  {
+    "name": "ORA",
+    "description": "Logical Inclusive OR"
+  },
+  {
+    
+    "name": "PHA",
+    "description": "Push Accumulator"
+  },
+  {  
+    "name": "PHP",
+    "description": "Push Processor Status"
+  },
+  {
+    "name": "PLA",
+    "description": "Pull Accumulator"
+  },
+  {
+
+    "name": "PLP",
+    "description": "Pull Processor Status"
+  },
+  {
+    
+    "name": "ROL",
+    "description": "Rotate Left"
+  },
+  {
+    "name": "ROR",
+    "description": "Rotate Right",
+  },
+  {
+    "name": "RTI",
+    "description": "Return from Interrupt"
+  },
+  {
+    
+    "name": "RTS",
+    "description": "Return from Subroutine",
+  },
+  {
+
+    "name": "SBC",
+    "description": "Subtract with Carry"
+  },
+  {
+    "name": "SEC",
+    "description": "Set Carry Flag" 
+  },
+  {
+    "name": "SED",
+    "description": "Set Decimal Flag",
+  },
+  {  
+    "name": "SEI",
+    "description": "Set Interrupt Disable"
+  },
+  {
+    "name": "STA",
+    "description": "Store Accumulator"
+  },
+  {
+
+    "name": "STX",
+    "description": "Store X Register"
+  },
+  {
+    
+    "name": "STY",
+    "description": "Store Y Register",
+  },
+  {
+    
+    "name": "TAX",
+    "description": "Transfer Accumulator to X",
+  },
+  {
+    "name": "TAY",
+    "description": "Transfer Accumulator to Y"
+  },
+  {
+    "name": "TSX",
+    "description": "Transfer Stack Pointer to X"  
+  },
+  {
+    "name": "TXA",
+    "description": "Transfer X to Accumulator"
+  },
+  {
+    "name": "TXS",
+    "description": "Transfer X to Stack Pointer"
+  },
+  {
+    "name": "TYA",
+    "description": "Transfer Y to Accumulator"
+  }
+]

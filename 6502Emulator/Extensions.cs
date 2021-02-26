@@ -8,6 +8,7 @@ namespace _6502Emulator
 {
     public static class Extensions
     {
+
         public static int ToDecimal(this string hexStr)
         {
             int number = 0;

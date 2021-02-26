@@ -28,36 +28,41 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.codeTextBox = new System.Windows.Forms.RichTextBox();
             this.BuildButton = new System.Windows.Forms.Button();
             this.BuildFile = new System.Windows.Forms.Button();
+            this.Update = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
             // dataGridView1
             // 
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(80, 2);
+            this.dataGridView1.Location = new System.Drawing.Point(71, 2);
+            this.dataGridView1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowHeadersWidth = 51;
             this.dataGridView1.RowTemplate.Height = 28;
-            this.dataGridView1.Size = new System.Drawing.Size(703, 65);
+            this.dataGridView1.Size = new System.Drawing.Size(625, 52);
             this.dataGridView1.TabIndex = 4;
             // 
             // codeTextBox
             // 
-            this.codeTextBox.Location = new System.Drawing.Point(801, 2);
+            this.codeTextBox.Location = new System.Drawing.Point(712, 2);
+            this.codeTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.codeTextBox.Name = "codeTextBox";
-            this.codeTextBox.Size = new System.Drawing.Size(405, 548);
+            this.codeTextBox.Size = new System.Drawing.Size(582, 439);
             this.codeTextBox.TabIndex = 5;
             this.codeTextBox.Text = "";
             // 
             // BuildButton
             // 
-            this.BuildButton.Location = new System.Drawing.Point(801, 557);
+            this.BuildButton.Location = new System.Drawing.Point(712, 446);
+            this.BuildButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.BuildButton.Name = "BuildButton";
-            this.BuildButton.Size = new System.Drawing.Size(405, 37);
+            this.BuildButton.Size = new System.Drawing.Size(360, 30);
             this.BuildButton.TabIndex = 6;
             this.BuildButton.Text = "Quick Build";
             this.BuildButton.UseVisualStyleBackColor = true;
@@ -65,9 +70,10 @@
             // 
             // BuildFile
             // 
-            this.BuildFile.Location = new System.Drawing.Point(801, 600);
+            this.BuildFile.Location = new System.Drawing.Point(712, 480);
+            this.BuildFile.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.BuildFile.Name = "BuildFile";
-            this.BuildFile.Size = new System.Drawing.Size(405, 43);
+            this.BuildFile.Size = new System.Drawing.Size(360, 34);
             this.BuildFile.TabIndex = 7;
             this.BuildFile.Text = "Build From File";
             this.BuildFile.UseVisualStyleBackColor = true;
@@ -75,14 +81,13 @@
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1233, 722);
+            this.ClientSize = new System.Drawing.Size(1339, 578);
             this.Controls.Add(this.BuildFile);
             this.Controls.Add(this.BuildButton);
             this.Controls.Add(this.codeTextBox);
             this.Controls.Add(this.dataGridView1);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
@@ -96,6 +101,7 @@
         private System.Windows.Forms.RichTextBox codeTextBox;
         private System.Windows.Forms.Button BuildButton;
         private System.Windows.Forms.Button BuildFile;
+        private System.Windows.Forms.Timer Update;
     }
 }
 

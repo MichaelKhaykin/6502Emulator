@@ -13,6 +13,7 @@ namespace _6502Emulator.Instructions
         public List<byte> Parameters { get; set; }
         public abstract byte OpCode { get; }
         public short ByteOffset { get; init; }
-        public int InstructionNumber { get; init; }
+        public int InstructionNumber { get; set; }
+        public string Description { get; set; }
     }
 }

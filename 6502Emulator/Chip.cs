@@ -35,6 +35,7 @@ namespace _6502Emulator
 
             StackPointer = 0;
             ProgramCounter = 0;
+
         }
     }
 }
