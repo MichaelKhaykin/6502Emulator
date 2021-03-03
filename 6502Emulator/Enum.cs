@@ -8,21 +8,22 @@ namespace _6502Emulator
 {
     public enum AddressingModes
     {
-        DEFAULTCASE,
-        JumpLabel,
-        Implied,
-        Relative,
-        Accumulator,
         Immediate,
+        Absolute,
         ZeroPage,
+        Implied,
+        Accumulator,
+        IndirectX,
+        IndirectY,
         ZeroPageX,
         ZeroPageY,
-        Absolute,
         AbsoluteX,
         AbsoluteY,
+        Relative,
         Indirect,
-        IndirectX,
-        IndirectY
+    
+        DEFAULTCASE,
+        JumpLabel,
     }
 
     public enum InstructionType
@@ -35,11 +36,11 @@ namespace _6502Emulator
 
     public enum FlagType
     {
-        N,
-        Z,
         C,
-        I,
-        D,
+        Z,
         V,
+        S,
+        D,
+        B,
     }
 }

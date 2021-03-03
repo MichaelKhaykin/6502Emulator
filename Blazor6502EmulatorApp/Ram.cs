@@ -12,12 +12,12 @@ namespace _6502Emulator
         private FancyMemory<byte>[] Memory = new FancyMemory<byte>[0xFFFF];
         public ref FancyMemory<byte> this[int index] => ref Memory[index];    
     
-        public Ram(Action<FancyMemory<byte>, PropertyChangedEventArgs> actionToRunOnChange)
+        public Ram(Action<object, PropertyChangedEventArgs> actionToRunOnChange)
         {
             for(int i = 0; i < Memory.Length; i++)
             {
                 Memory[i] = new FancyMemory<byte>(0, i);
-                Memory[i].PropertyChanged += actionToRunOnChange;
+                Memory[i].PropertyChanged += new PropertyChangedEventHandler(actionToRunOnChange);
             }
         }
     }

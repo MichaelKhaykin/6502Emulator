@@ -34,6 +34,7 @@
             this.BuildButton = new System.Windows.Forms.Button();
             this.BuildFile = new System.Windows.Forms.Button();
             this.Update = new System.Windows.Forms.Timer(this.components);
+            this.DebugButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -79,11 +80,22 @@
             this.BuildFile.UseVisualStyleBackColor = true;
             this.BuildFile.Click += new System.EventHandler(this.BuildFile_Click);
             // 
+            // DebugButton
+            // 
+            this.DebugButton.Location = new System.Drawing.Point(712, 520);
+            this.DebugButton.Name = "DebugButton";
+            this.DebugButton.Size = new System.Drawing.Size(360, 27);
+            this.DebugButton.TabIndex = 9;
+            this.DebugButton.Text = "Step Through";
+            this.DebugButton.UseVisualStyleBackColor = true;
+            this.DebugButton.Click += new System.EventHandler(this.DebugButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1339, 578);
+            this.ClientSize = new System.Drawing.Size(1339, 778);
+            this.Controls.Add(this.DebugButton);
             this.Controls.Add(this.BuildFile);
             this.Controls.Add(this.BuildButton);
             this.Controls.Add(this.codeTextBox);
@@ -102,6 +114,7 @@
         private System.Windows.Forms.Button BuildButton;
         private System.Windows.Forms.Button BuildFile;
         private System.Windows.Forms.Timer Update;
+        private System.Windows.Forms.Button DebugButton;
     }
 }
 

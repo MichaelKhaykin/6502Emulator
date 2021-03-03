@@ -483,7 +483,7 @@ namespace _6502Emulator
 
         public static int MemorySize = 65536;
 
-        public static int InitialOffset = 0x600;
+        public static short InitialOffset = 0x600;
 
         public static Font Font;
 

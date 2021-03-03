@@ -1,4 +1,5 @@
-﻿using _6502Emulator.Instructions.Arthimetic;
+﻿using _6502Emulator.FancyWrappers;
+using _6502Emulator.Instructions.Arthimetic;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,21 +19,70 @@ namespace _6502Emulator
         Dictionary<int, int> reverseMatching = new Dictionary<int, int>();
         Dictionary<int, int> lineToLength = new Dictionary<int, int>();
 
+        Action<FancyMemory<byte>, PropertyChangedEventArgs> onMemoryValueChanged;
+        Dictionary<int, byte> memoryValues = new Dictionary<int, byte>();
+
+        Action<FancyRegister<short>, PropertyChangedEventArgs> onRegisterValueChangedShort;
+        Dictionary<string, short> registerShortValues = new Dictionary<string, short>();
+
+        Action<FancyRegister<byte>, PropertyChangedEventArgs> onRegisterValueChangedByte;
+        Dictionary<string, byte> registerByteValues = new Dictionary<string, byte>();
+
+        Action<FancyFlag, PropertyChangedEventArgs> onFlagChanged;
+        Dictionary<FlagType, bool> flagValues = new Dictionary<FlagType, bool>();
+
+        Queue<int> indicies = new Queue<int>();
+
+        Chip chip;
         public Form1()
         {
             InitializeComponent();
+
+            onMemoryValueChanged = new Action<FancyMemory<byte>, PropertyChangedEventArgs>((obj, args) =>
+            {
+                if (memoryValues.ContainsKey(obj.Index) == false)
+                {
+                    memoryValues.Add(obj.Index, 0);
+                }
+                memoryValues[obj.Index] = obj.Value;
+            });
+            onRegisterValueChangedShort = new Action<FancyRegister<short>, PropertyChangedEventArgs>((obj, args) =>
+            {
+                if (registerShortValues.ContainsKey(obj.Name) == false)
+                {
+                    registerShortValues.Add(obj.Name, 0);
+                }
+                registerShortValues[obj.Name] = obj.Value;
+            });
+            onRegisterValueChangedByte = new Action<FancyRegister<byte>, PropertyChangedEventArgs>((obj, args) =>
+            {
+                if (registerByteValues.ContainsKey(obj.Name) == false)
+                {
+                    registerByteValues.Add(obj.Name, 0);
+                }
+                registerByteValues[obj.Name] = obj.Value;
+            });
+            onFlagChanged = new Action<FancyFlag, PropertyChangedEventArgs>((obj, args) =>
+            {
+                if (flagValues.ContainsKey(obj.Type) == false)
+                {
+                    flagValues.Add(obj.Type, obj.HasValue);
+                }
+                flagValues[obj.Type] = obj.HasValue;
+            });
+
+            Computer.Ram = new Ram(onMemoryValueChanged);
         }
 
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            this.WindowState = FormWindowState.Maximized;
+
             Helper.Font = new Font(FontFamily.GenericMonospace, 14);
             codeTextBox.SelectionChanged += codeTextBox_SelectionChanged;
 
             PopulateDescriptions();
-
-            Chip chip = new Chip();
-
         }
 
         private void PopulateDescriptions()
@@ -89,7 +139,7 @@ namespace _6502Emulator
             dataGridView1.BorderStyle = BorderStyle.None;
             dataGridView1.CellBorderStyle = DataGridViewCellBorderStyle.None;
 
-          
+
             foreach (DataGridViewColumn col in dataGridView1.Columns)
             {
                 col.SortMode = DataGridViewColumnSortMode.NotSortable;
@@ -102,6 +152,10 @@ namespace _6502Emulator
             dataGridView1.DefaultCellStyle.SelectionBackColor = dataGridView1.DefaultCellStyle.BackColor;
             dataGridView1.DefaultCellStyle.SelectionForeColor = dataGridView1.DefaultCellStyle.ForeColor;
             dataGridView1.CellFormatting += DataGridView1_CellFormatting;
+
+            dataGridView1.BackgroundColor = this.BackColor;
+
+            chip = new Chip(onRegisterValueChangedShort, onRegisterValueChangedByte, onFlagChanged, instructions);
         }
         private void ResetTextColor()
         {
@@ -109,7 +163,6 @@ namespace _6502Emulator
             codeTextBox.SelectionColor = Color.Black;
             codeTextBox.SelectionBackColor = codeTextBox.BackColor;
         }
-
         private void ResetCellColors()
         {
             dataGridView1.ClearSelection();
@@ -122,8 +175,6 @@ namespace _6502Emulator
                 }
             }
         }
-
-
         private void DataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.ColumnIndex != 0 || e.RowIndex < 0 || e.RowIndex >= dataGridView1.Rows.Count)
@@ -133,9 +184,9 @@ namespace _6502Emulator
 
                 return;
             }
-            
+
             ResetTextColor();
-            
+
             dataGridView1.CurrentRow.DefaultCellStyle.SelectionBackColor = Color.Yellow;
 
             var textboxLine = reverseMatching[e.RowIndex];
@@ -144,7 +195,6 @@ namespace _6502Emulator
             int startIndex = codeTextBox.GetFirstCharIndexFromLine(textboxLine);
             codeTextBox.Select(startIndex, length);
         }
-
         private void DataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             if (e.RowIndex < 0 || e.RowIndex >= dataGridView1.Rows.Count) return;
@@ -162,6 +212,8 @@ namespace _6502Emulator
                     if (e.RowIndex < 0 || e.RowIndex >= dataGridView1.Rows.Count) return;
                     if (e.ColumnIndex != 2) return;
 
+                    if (dataGridView1[e.ColumnIndex, e.RowIndex].Value == null) return;
+
                     var nameOfInstruction = dataGridView1[e.ColumnIndex, e.RowIndex].Value.ToString().Substring(0, 3);
                     InstructionType type = (InstructionType)Enum.Parse(typeof(InstructionType), nameOfInstruction);
 
@@ -173,12 +225,14 @@ namespace _6502Emulator
         private void BuildButton_Click(object sender, EventArgs e)
         {
             System.IO.File.WriteAllText("temp.txt", codeTextBox.Text);
+
+            BuilderHelper(System.IO.File.ReadAllLines("temp.txt"));
+
             Display("temp.txt");
         }
 
-        private void BuildFile_Click(object sender, EventArgs e)
+        private void BuilderHelper(string[] lines)
         {
-            var lines = System.IO.File.ReadAllLines("6502Code.txt");
             var copy = lines;
 
             lines = AssemblyParser.ReplaceDefines(lines);
@@ -215,12 +269,23 @@ namespace _6502Emulator
                 if (lines.Contains(copy[i].Trim()))
                 {
                     matching.Add(i, internalCount);
+
+                    indicies.Enqueue(i);
+                    
                     reverseMatching.Add(internalCount, i);
                     lineToLength.Add(i, copyOfCopy[i].Length);
 
                     internalCount++;
                 }
             }
+
+        }
+
+        private void BuildFile_Click(object sender, EventArgs e)
+        {
+            var lines = System.IO.File.ReadAllLines("6502Code.txt");
+
+            BuilderHelper(lines);
 
             codeTextBox.Text = System.IO.File.ReadAllText("6502Code.txt");
             Display("6502Code.txt");
@@ -241,8 +306,95 @@ namespace _6502Emulator
                     cell.Style.BackColor = Color.Yellow;
                 }
             }
+        }
 
-            this.Text = line.ToString();
+        private void DebugButton_Click(object sender, EventArgs e)
+        {
+            if (chip == null)
+            {
+                MessageBox.Show("Please build code first");
+                return;
+            }
+            if (indicies.Count == 0)
+            {
+                MessageBox.Show("Program has finished");
+                return;
+            }
+
+            for (int i = 0; i < Controls.Count; i++)
+            {
+                if ((string)Controls[i].Tag == "RemoveMe")
+                {
+                    Controls.RemoveAt(i);
+                    break;
+                }
+            }
+
+            ResetCellColors();
+            ResetTextColor();
+
+            var index = indicies.Dequeue();
+
+            if (matching.ContainsKey(index))
+            {
+                var row = dataGridView1.Rows[matching[index]];
+                foreach (DataGridViewCell cell in row.Cells)
+                {
+                    cell.Style.BackColor = Color.Green;
+                }
+            }
+
+            codeTextBox.Select(codeTextBox.GetFirstCharIndexFromLine(index), lineToLength[index]);
+            codeTextBox.SelectionColor = Color.Red;
+
+            chip.EmulateSingleInstruction(matching[index]);
+
+            DataTable table = new DataTable();
+            table.Columns.Add();
+            table.Columns.Add();
+
+            foreach (var memorykvp in memoryValues)
+            {
+                table.Rows.Add(memorykvp.Key, Convert.ToString(memorykvp.Value, 16));
+            }
+
+            foreach (var flagvaluekvp in flagValues)
+            {
+                table.Rows.Add(flagvaluekvp.Key, flagvaluekvp.Value);
+            }
+
+            foreach (var registershortkvp in registerShortValues)
+            {
+                table.Rows.Add(registershortkvp.Key, Convert.ToString(registershortkvp.Value, 16));
+            }
+
+            foreach (var registerbytekvp in registerByteValues)
+            {
+                table.Rows.Add(registerbytekvp.Key, Convert.ToString(registerbytekvp.Value, 16));
+            }
+
+            var newDataGridView = new DataGridView()
+            {
+                Location = new Point(codeTextBox.Right, 0),
+                DataSource = table,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                Height = this.Height,
+                RowHeadersVisible = false,
+                BorderStyle = BorderStyle.None,
+                CellBorderStyle = DataGridViewCellBorderStyle.None,
+                Tag = "RemoveMe",
+                BackgroundColor = BackColor,
+            };
+
+            foreach (DataGridViewColumn col in newDataGridView.Columns)
+            {
+                col.SortMode = DataGridViewColumnSortMode.NotSortable;
+                col.ReadOnly = true;
+            }
+
+            newDataGridView.ClearSelection();
+
+            Controls.Add(newDataGridView);
         }
     }
 }
