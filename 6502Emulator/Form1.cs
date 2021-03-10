@@ -1,5 +1,6 @@
 ﻿using _6502Emulator.FancyWrappers;
 using _6502Emulator.Instructions.Arthimetic;
+using _6502Emulator.VisualizationClasses;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,28 +16,26 @@ namespace _6502Emulator
 {
     public partial class Form1 : Form
     {
-        Dictionary<int, int> matching = new Dictionary<int, int>();
-        Dictionary<int, int> reverseMatching = new Dictionary<int, int>();
-        Dictionary<int, int> lineToLength = new Dictionary<int, int>();
-
         Action<FancyMemory<byte>, PropertyChangedEventArgs> onMemoryValueChanged;
         Dictionary<int, byte> memoryValues = new Dictionary<int, byte>();
 
         Action<FancyRegister<short>, PropertyChangedEventArgs> onRegisterValueChangedShort;
         Dictionary<string, short> registerShortValues = new Dictionary<string, short>();
-
+        
         Action<FancyRegister<byte>, PropertyChangedEventArgs> onRegisterValueChangedByte;
         Dictionary<string, byte> registerByteValues = new Dictionary<string, byte>();
 
         Action<FancyFlag, PropertyChangedEventArgs> onFlagChanged;
         Dictionary<FlagType, bool> flagValues = new Dictionary<FlagType, bool>();
 
-        Queue<int> indicies = new Queue<int>();
+        MappingsHelper helper;
 
         Chip chip;
         public Form1()
         {
             InitializeComponent();
+
+            
 
             onMemoryValueChanged = new Action<FancyMemory<byte>, PropertyChangedEventArgs>((obj, args) =>
             {
@@ -189,8 +188,8 @@ namespace _6502Emulator
 
             dataGridView1.CurrentRow.DefaultCellStyle.SelectionBackColor = Color.Yellow;
 
-            var textboxLine = reverseMatching[e.RowIndex];
-            var length = lineToLength[textboxLine];
+            var textboxLine = helper.DissassemblyIndexToLineIndex[e.RowIndex];
+            var length = helper.LineIndexToLength[textboxLine];
 
             int startIndex = codeTextBox.GetFirstCharIndexFromLine(textboxLine);
             codeTextBox.Select(startIndex, length);
@@ -226,66 +225,16 @@ namespace _6502Emulator
         {
             System.IO.File.WriteAllText("temp.txt", codeTextBox.Text);
 
-            BuilderHelper(System.IO.File.ReadAllLines("temp.txt"));
+            helper = new MappingsHelper(System.IO.File.ReadAllLines("temp.txt"));
 
             Display("temp.txt");
-        }
-
-        private void BuilderHelper(string[] lines)
-        {
-            var copy = lines;
-
-            lines = AssemblyParser.ReplaceDefines(lines);
-            lines = AssemblyParser.RemoveLabels(lines);
-            lines = AssemblyParser.GetRidOfCommentsAndEmptyLines(lines);
-
-            var copyOfCopy = copy;
-
-            copy = copy.Select((x) =>
-            {
-                if (!x.Contains(';')) return x.Trim();
-
-                return x.Substring(0, x.IndexOf(';')).Trim();
-            }).ToArray();
-
-
-            var table = AssemblyParser.GenerateDefineReplacementTable(copy);
-            for (int i = 0; i < copy.Length; i++)
-            {
-                if (copy.Contains("define")) continue;
-
-                foreach (var defineValue in table)
-                {
-                    if (copy[i].Contains(defineValue.Key))
-                    {
-                        copy[i] = copy[i].Replace(defineValue.Key, defineValue.Value);
-                    }
-                }
-            }
-
-            int internalCount = 0;
-            for (int i = 0; i < copy.Length; i++)
-            {
-                if (lines.Contains(copy[i].Trim()))
-                {
-                    matching.Add(i, internalCount);
-
-                    indicies.Enqueue(i);
-                    
-                    reverseMatching.Add(internalCount, i);
-                    lineToLength.Add(i, copyOfCopy[i].Length);
-
-                    internalCount++;
-                }
-            }
-
         }
 
         private void BuildFile_Click(object sender, EventArgs e)
         {
             var lines = System.IO.File.ReadAllLines("6502Code.txt");
 
-            BuilderHelper(lines);
+            helper = new MappingsHelper(lines);
 
             codeTextBox.Text = System.IO.File.ReadAllText("6502Code.txt");
             Display("6502Code.txt");
@@ -298,9 +247,11 @@ namespace _6502Emulator
             int index = codeTextBox.SelectionStart;
             int line = codeTextBox.GetLineFromCharIndex(index);
 
-            if (matching.ContainsKey(line))
+            if (helper == null) return;
+
+            if (helper.LineIndexToDissassemblyIndex.ContainsKey(line))
             {
-                var row = dataGridView1.Rows[matching[line]];
+                var row = dataGridView1.Rows[helper.LineIndexToDissassemblyIndex[line]];
                 foreach (DataGridViewCell cell in row.Cells)
                 {
                     cell.Style.BackColor = Color.Yellow;
@@ -315,7 +266,7 @@ namespace _6502Emulator
                 MessageBox.Show("Please build code first");
                 return;
             }
-            if (indicies.Count == 0)
+            if (helper.LineIndicies.Count == 0)
             {
                 MessageBox.Show("Program has finished");
                 return;
@@ -333,21 +284,21 @@ namespace _6502Emulator
             ResetCellColors();
             ResetTextColor();
 
-            var index = indicies.Dequeue();
+            var index = helper.LineIndicies.Dequeue();
 
-            if (matching.ContainsKey(index))
+            if (helper.LineIndexToDissassemblyIndex.ContainsKey(index))
             {
-                var row = dataGridView1.Rows[matching[index]];
+                var row = dataGridView1.Rows[helper.LineIndexToDissassemblyIndex[index]];
                 foreach (DataGridViewCell cell in row.Cells)
                 {
                     cell.Style.BackColor = Color.Green;
                 }
             }
 
-            codeTextBox.Select(codeTextBox.GetFirstCharIndexFromLine(index), lineToLength[index]);
+            codeTextBox.Select(codeTextBox.GetFirstCharIndexFromLine(index), helper.LineIndexToLength[index]);
             codeTextBox.SelectionColor = Color.Red;
 
-            chip.EmulateSingleInstruction(matching[index]);
+            chip.EmulateSingleInstruction(helper.LineIndexToDissassemblyIndex[index]);
 
             DataTable table = new DataTable();
             table.Columns.Add();
@@ -355,7 +306,7 @@ namespace _6502Emulator
 
             foreach (var memorykvp in memoryValues)
             {
-                table.Rows.Add(memorykvp.Key, Convert.ToString(memorykvp.Value, 16));
+                table.Rows.Add(memorykvp.Key, "0x" + Convert.ToString(memorykvp.Value, 16));
             }
 
             foreach (var flagvaluekvp in flagValues)
@@ -365,12 +316,12 @@ namespace _6502Emulator
 
             foreach (var registershortkvp in registerShortValues)
             {
-                table.Rows.Add(registershortkvp.Key, Convert.ToString(registershortkvp.Value, 16));
+                table.Rows.Add(registershortkvp.Key, "0x" + Convert.ToString(registershortkvp.Value, 16));
             }
 
             foreach (var registerbytekvp in registerByteValues)
             {
-                table.Rows.Add(registerbytekvp.Key, Convert.ToString(registerbytekvp.Value, 16));
+                table.Rows.Add(registerbytekvp.Key, "0x" + Convert.ToString(registerbytekvp.Value, 16));
             }
 
             var newDataGridView = new DataGridView()
@@ -380,6 +331,7 @@ namespace _6502Emulator
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
                 Height = this.Height,
                 RowHeadersVisible = false,
+                ColumnHeadersVisible = false,
                 BorderStyle = BorderStyle.None,
                 CellBorderStyle = DataGridViewCellBorderStyle.None,
                 Tag = "RemoveMe",
