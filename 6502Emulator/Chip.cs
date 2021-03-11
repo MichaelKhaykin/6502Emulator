@@ -11,12 +11,12 @@ namespace _6502Emulator
 {
     public class Chip
     {
-        private FancyRegister<byte> XRegister;
-        private FancyRegister<byte> YRegister;
-        private FancyRegister<byte> AccumulatorRegister;
+        private PropertyObservationWrapper<byte> XRegister;
+        private PropertyObservationWrapper<byte> YRegister;
+        private PropertyObservationWrapper<byte> AccumulatorRegister;
                               
-        private FancyRegister<byte> StackPointer;
-        private FancyRegister<short> ProgramCounter;
+        private PropertyObservationWrapper<byte> StackPointer;
+        private PropertyObservationWrapper<short> ProgramCounter;
 
         public Dictionary<FlagType, FancyFlag> Flags = new Dictionary<FlagType, FancyFlag>()
         {
@@ -31,8 +31,8 @@ namespace _6502Emulator
         private List<BaseInstruction> instructions;
 
         public int NumberOfInstructions => instructions.Count;
-        public Chip(Action<FancyRegister<short>, PropertyChangedEventArgs> registerActionShort,
-                    Action<FancyRegister<byte>, PropertyChangedEventArgs> registerActionByte,
+        public Chip(Action<PropertyObservationWrapper<short>, PropertyChangedEventArgs> registerActionShort,
+                    Action<PropertyObservationWrapper<byte>, PropertyChangedEventArgs> registerActionByte,
                     Action<FancyFlag, PropertyChangedEventArgs> flagChangedAction,
                     List<BaseInstruction> instructions)
         {
@@ -43,19 +43,19 @@ namespace _6502Emulator
 
             this.instructions = instructions;
 
-            XRegister = new FancyRegister<byte>(0,  "X-Register");
+            XRegister = new PropertyObservationWrapper<byte>(0,  "X-Register");
             XRegister.PropertyChanged += registerActionByte;
 
-            YRegister = new FancyRegister<byte>(0, "Y-Register");
+            YRegister = new PropertyObservationWrapper<byte>(0, "Y-Register");
             YRegister.PropertyChanged += registerActionByte;
 
-            AccumulatorRegister = new FancyRegister<byte>(0, "Accumulator Register");
+            AccumulatorRegister = new PropertyObservationWrapper<byte>(0, "Accumulator Register");
             AccumulatorRegister.PropertyChanged += registerActionByte;
 
-            StackPointer = new FancyRegister<byte>(0, "Stack Pointer");
+            StackPointer = new PropertyObservationWrapper<byte>(0, "Stack Pointer");
             StackPointer.PropertyChanged += registerActionByte;
 
-            ProgramCounter = new FancyRegister<short>(Helper.InitialOffset, "Program Counter");
+            ProgramCounter = new PropertyObservationWrapper<short>(Helper.InitialOffset, "Program Counter");
             ProgramCounter.PropertyChanged += registerActionShort;
 
         }

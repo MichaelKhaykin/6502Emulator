@@ -1,4 +1,5 @@
-﻿using System;
+﻿using _6502Emulator.FancyWrappers;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -9,14 +10,14 @@ namespace _6502Emulator
 {
     public class Ram
     {
-        private FancyMemory<byte>[] Memory = new FancyMemory<byte>[0xFFFF];
-        public ref FancyMemory<byte> this[int index] => ref Memory[index];    
+        private PropertyObservationWrapper<byte>[] Memory = new PropertyObservationWrapper<byte>[0xFFFF];
+        public ref PropertyObservationWrapper<byte> this[int index] => ref Memory[index];    
     
-        public Ram(Action<FancyMemory<byte>, PropertyChangedEventArgs> actionToRunOnChange)
+        public Ram(Action<PropertyObservationWrapper<byte>, PropertyChangedEventArgs> actionToRunOnChange)
         {
             for(int i = 0; i < Memory.Length; i++)
             {
-                Memory[i] = new FancyMemory<byte>(0, i);
+                Memory[i] = new PropertyObservationWrapper<byte>(0, i);
                 Memory[i].PropertyChanged += actionToRunOnChange;
             }
         }

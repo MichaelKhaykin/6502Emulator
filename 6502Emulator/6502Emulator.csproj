@@ -67,11 +67,13 @@
   <ItemGroup>
     <Compile Include="Chip.cs" />
     <Compile Include="Computer.cs" />
+    <Compile Include="PropertyChangeTracker.cs" />
     <Compile Include="Enum.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="FancyWrappers\FancyFlag.cs" />
     <Compile Include="FancyWrappers\FancyMemory.cs" />
     <Compile Include="FancyWrappers\FancyRegister.cs" />
+    <Compile Include="FancyWrappers\PropertyObservationWrapper.cs" />
     <Compile Include="FancyWrappers\INotifyDataChanged.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>

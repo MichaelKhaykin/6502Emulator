@@ -16,14 +16,9 @@ namespace _6502Emulator
 {
     public partial class Form1 : Form
     {
-        Action<FancyMemory<byte>, PropertyChangedEventArgs> onMemoryValueChanged;
-        Dictionary<int, byte> memoryValues = new Dictionary<int, byte>();
-
-        Action<FancyRegister<short>, PropertyChangedEventArgs> onRegisterValueChangedShort;
-        Dictionary<string, short> registerShortValues = new Dictionary<string, short>();
-        
-        Action<FancyRegister<byte>, PropertyChangedEventArgs> onRegisterValueChangedByte;
-        Dictionary<string, byte> registerByteValues = new Dictionary<string, byte>();
+        PropertyChangeTracker<int, byte> MemoryObserver;
+        PropertyChangeTracker<string, short> ShortRegisterObserver;
+        PropertyChangeTracker<string, byte> ByteRegisterObserver;
 
         Action<FancyFlag, PropertyChangedEventArgs> onFlagChanged;
         Dictionary<FlagType, bool> flagValues = new Dictionary<FlagType, bool>();
@@ -35,32 +30,10 @@ namespace _6502Emulator
         {
             InitializeComponent();
 
-            
+            MemoryObserver = new PropertyChangeTracker<int, byte>();
+            ShortRegisterObserver = new PropertyChangeTracker<string, short>();
+            ByteRegisterObserver = new PropertyChangeTracker<string, byte>();
 
-            onMemoryValueChanged = new Action<FancyMemory<byte>, PropertyChangedEventArgs>((obj, args) =>
-            {
-                if (memoryValues.ContainsKey(obj.Index) == false)
-                {
-                    memoryValues.Add(obj.Index, 0);
-                }
-                memoryValues[obj.Index] = obj.Value;
-            });
-            onRegisterValueChangedShort = new Action<FancyRegister<short>, PropertyChangedEventArgs>((obj, args) =>
-            {
-                if (registerShortValues.ContainsKey(obj.Name) == false)
-                {
-                    registerShortValues.Add(obj.Name, 0);
-                }
-                registerShortValues[obj.Name] = obj.Value;
-            });
-            onRegisterValueChangedByte = new Action<FancyRegister<byte>, PropertyChangedEventArgs>((obj, args) =>
-            {
-                if (registerByteValues.ContainsKey(obj.Name) == false)
-                {
-                    registerByteValues.Add(obj.Name, 0);
-                }
-                registerByteValues[obj.Name] = obj.Value;
-            });
             onFlagChanged = new Action<FancyFlag, PropertyChangedEventArgs>((obj, args) =>
             {
                 if (flagValues.ContainsKey(obj.Type) == false)
@@ -70,7 +43,7 @@ namespace _6502Emulator
                 flagValues[obj.Type] = obj.HasValue;
             });
 
-            Computer.Ram = new Ram(onMemoryValueChanged);
+            Computer.Ram = new Ram(MemoryObserver.OnPropChanged);
         }
 
 
@@ -154,7 +127,7 @@ namespace _6502Emulator
 
             dataGridView1.BackgroundColor = this.BackColor;
 
-            chip = new Chip(onRegisterValueChangedShort, onRegisterValueChangedByte, onFlagChanged, instructions);
+            chip = new Chip(ShortRegisterObserver.OnPropChanged, ByteRegisterObserver.OnPropChanged, onFlagChanged, instructions);
         }
         private void ResetTextColor()
         {
@@ -304,7 +277,7 @@ namespace _6502Emulator
             table.Columns.Add();
             table.Columns.Add();
 
-            foreach (var memorykvp in memoryValues)
+            foreach (var memorykvp in MemoryObserver.ChangedPropValues)
             {
                 table.Rows.Add(memorykvp.Key, "0x" + Convert.ToString(memorykvp.Value, 16));
             }
@@ -314,12 +287,12 @@ namespace _6502Emulator
                 table.Rows.Add(flagvaluekvp.Key, flagvaluekvp.Value);
             }
 
-            foreach (var registershortkvp in registerShortValues)
+            foreach (var registershortkvp in ShortRegisterObserver.ChangedPropValues)
             {
                 table.Rows.Add(registershortkvp.Key, "0x" + Convert.ToString(registershortkvp.Value, 16));
             }
 
-            foreach (var registerbytekvp in registerByteValues)
+            foreach (var registerbytekvp in ByteRegisterObserver.ChangedPropValues)
             {
                 table.Rows.Add(registerbytekvp.Key, "0x" + Convert.ToString(registerbytekvp.Value, 16));
             }
