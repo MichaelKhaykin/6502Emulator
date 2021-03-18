@@ -35,6 +35,7 @@
             this.BuildFile = new System.Windows.Forms.Button();
             this.Update = new System.Windows.Forms.Timer(this.components);
             this.DebugButton = new System.Windows.Forms.Button();
+            this.fileComboBox = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -80,6 +81,10 @@
             this.BuildFile.UseVisualStyleBackColor = true;
             this.BuildFile.Click += new System.EventHandler(this.BuildFile_Click);
             // 
+            // Update
+            // 
+            this.Update.Tick += new System.EventHandler(this.Update_Tick);
+            // 
             // DebugButton
             // 
             this.DebugButton.Location = new System.Drawing.Point(712, 520);
@@ -90,11 +95,21 @@
             this.DebugButton.UseVisualStyleBackColor = true;
             this.DebugButton.Click += new System.EventHandler(this.DebugButton_Click);
             // 
+            // fileComboBox
+            // 
+            this.fileComboBox.FormattingEnabled = true;
+            this.fileComboBox.Location = new System.Drawing.Point(1078, 481);
+            this.fileComboBox.Name = "fileComboBox";
+            this.fileComboBox.Size = new System.Drawing.Size(155, 24);
+            this.fileComboBox.TabIndex = 10;
+            this.fileComboBox.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1339, 778);
+            this.Controls.Add(this.fileComboBox);
             this.Controls.Add(this.DebugButton);
             this.Controls.Add(this.BuildFile);
             this.Controls.Add(this.BuildButton);
@@ -115,6 +130,7 @@
         private System.Windows.Forms.Button BuildFile;
         private System.Windows.Forms.Timer Update;
         private System.Windows.Forms.Button DebugButton;
+        private System.Windows.Forms.ComboBox fileComboBox;
     }
 }
 

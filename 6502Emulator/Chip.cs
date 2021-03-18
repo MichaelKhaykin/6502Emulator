@@ -14,29 +14,39 @@ namespace _6502Emulator
         private PropertyObservationWrapper<byte> XRegister;
         private PropertyObservationWrapper<byte> YRegister;
         private PropertyObservationWrapper<byte> AccumulatorRegister;
-                              
-        private PropertyObservationWrapper<byte> StackPointer;
-        private PropertyObservationWrapper<short> ProgramCounter;
 
-        public Dictionary<FlagType, FancyFlag> Flags = new Dictionary<FlagType, FancyFlag>()
+        private PropertyObservationWrapper<byte> StackPointer;
+
+        public PropertyObservationWrapper<short> ProgramCounter;
+
+        public Dictionary<FlagType, PropertyObservationWrapper<bool>> Flags = new Dictionary<FlagType, PropertyObservationWrapper<bool>>()
         {
-            [FlagType.C] = new FancyFlag("Carry flag", FlagType.C),
-            [FlagType.Z] = new FancyFlag("Zero flag", FlagType.Z),
-            [FlagType.V] = new FancyFlag("Overflow flag", FlagType.V),
-            [FlagType.S] = new FancyFlag("Sign flag", FlagType.S),
-            [FlagType.D] = new FancyFlag("Decimal flag (base 10 vs base 16 math)", FlagType.D),
-            [FlagType.B] = new FancyFlag("Break flag", FlagType.B),
+            [FlagType.C] = new PropertyObservationWrapper<bool>(false, new FlagData("Carry flag", FlagType.C)),
+            [FlagType.Z] = new PropertyObservationWrapper<bool>(false, new FlagData("Zero flag", FlagType.Z)),
+            [FlagType.V] = new PropertyObservationWrapper<bool>(false, new FlagData("Overflow flag", FlagType.V)),
+            [FlagType.S] = new PropertyObservationWrapper<bool>(false, new FlagData("Sign flag", FlagType.S)),
+            [FlagType.D] = new PropertyObservationWrapper<bool>(false, new FlagData("Decimal flag (base 10 vs base 16 math)", FlagType.D)),
+            [FlagType.B] = new PropertyObservationWrapper<bool>(false, new FlagData("Break flag", FlagType.B)),
         };
 
         private List<BaseInstruction> instructions;
-
         public int NumberOfInstructions => instructions.Count;
+
+        public Dictionary<short, int> OffsetToIndexMap { get; set; } = new Dictionary<short, int>();
+        public Dictionary<int, short> IndexToOffsetMap { get; set; } = new Dictionary<int, short>();
         public Chip(Action<PropertyObservationWrapper<short>, PropertyChangedEventArgs> registerActionShort,
                     Action<PropertyObservationWrapper<byte>, PropertyChangedEventArgs> registerActionByte,
-                    Action<FancyFlag, PropertyChangedEventArgs> flagChangedAction,
+                    Action<PropertyObservationWrapper<bool>, PropertyChangedEventArgs> flagChangedAction,
                     List<BaseInstruction> instructions)
         {
-            foreach(var kvp in Flags)
+            for (int i = 0; i < instructions.Count; i++)
+            {
+                OffsetToIndexMap.Add((short)(instructions[i].ByteOffset + Helper.InitialOffset), i);
+                IndexToOffsetMap.Add(i, (short)(instructions[i].ByteOffset + Helper.InitialOffset));
+            }
+
+
+            foreach (var kvp in Flags)
             {
                 kvp.Value.PropertyChanged += flagChangedAction;
             }
@@ -59,18 +69,9 @@ namespace _6502Emulator
             ProgramCounter.PropertyChanged += registerActionShort;
 
         }
-
-        public void Emulate()
+        public short EmulateSingleInstruction()
         {
-            for(int i = 0; i < instructions.Count; i++)
-            {
-                EmulateSingleInstruction(i);
-            }
-        }
-
-        public void EmulateSingleInstruction(int index)
-        {
-            var instruction = instructions[index];
+            var instruction = instructions[OffsetToIndexMap[ProgramCounter.Value]];
 
             switch (instruction.Type)
             {
@@ -79,29 +80,45 @@ namespace _6502Emulator
                     switch (instruction.Mode)
                     {
                         case AddressingModes.Immediate:
+                            {
+                                byte byteValueToAddToAccumulator = instruction.Parameters[0];
 
-                            byte byteValueToAddToAccumulator = instruction.Parameters[0];
+                                byte carryFlag = Flags[FlagType.C].Value ? 1 : 0;
 
-                            byte carryFlag = Flags[FlagType.C].HasValue ? 1 : 0;
+                                byte result = (byte)(AccumulatorRegister.Value + byteValueToAddToAccumulator + carryFlag);
 
-                            byte result = (byte)(AccumulatorRegister.Value + byteValueToAddToAccumulator + carryFlag);
+                                bool isSeventhBitCarry1 = byteValueToAddToAccumulator >> 7 == 1 && AccumulatorRegister.Value >> 7 == 1;
 
-                            bool isSeventhBitCarry1 = byteValueToAddToAccumulator >> 7 == 1 && AccumulatorRegister.Value >> 7 == 1;
-                            bool isSixthBitCarry1 = byteValueToAddToAccumulator >> 6 == 1 && AccumulatorRegister.Value >> 6 == 1;
+                                Flags[FlagType.Z].Value = result == 0;
+                                Flags[FlagType.S].Value = (result >> 7) == 1;
+                                Flags[FlagType.C].Value = isSeventhBitCarry1;
+                                Flags[FlagType.V].Value = ((sbyte)AccumulatorRegister.Value).WillAdditionOverflow((sbyte)byteValueToAddToAccumulator + carryFlag);
 
-                            Flags[FlagType.Z].HasValue = result == 0;
-                            Flags[FlagType.S].HasValue = (result >> 7) == 1;
-                            Flags[FlagType.C].HasValue = isSeventhBitCarry1;
-                            Flags[FlagType.V].HasValue = isSeventhBitCarry1 ^ isSixthBitCarry1;
-
-                            AccumulatorRegister.Value = result;
-
-                            ProgramCounter.Value += 3;
-
+                                AccumulatorRegister.Value = result;
+                            }
                             break;
 
                         case AddressingModes.ZeroPage:
+                            {
+                                var address = instruction.Parameters[0];
+
+                                byte byteValueToAddToAccumulator = Computer.Ram[address].Value;
+
+                                byte carryFlag = Flags[FlagType.C].Value ? 1 : 0;
+
+                                byte result = (byte)(AccumulatorRegister.Value + byteValueToAddToAccumulator + carryFlag);
+
+                                bool isSeventhBitCarry1 = byteValueToAddToAccumulator >> 7 == 1 && AccumulatorRegister.Value >> 7 == 1;
+
+                                Flags[FlagType.Z].Value = result == 0;
+                                Flags[FlagType.S].Value = (result >> 7) == 1;
+                                Flags[FlagType.C].Value = isSeventhBitCarry1;
+                                Flags[FlagType.V].Value = ((sbyte)AccumulatorRegister.Value).WillAdditionOverflow((sbyte)byteValueToAddToAccumulator + carryFlag);
+
+                                AccumulatorRegister.Value = result;
+                            }
                             break;
+
                         case AddressingModes.ZeroPageX:
                             break;
                         case AddressingModes.Absolute:
@@ -133,8 +150,27 @@ namespace _6502Emulator
                     break;
                 case InstructionType.BIT:
                     break;
+
                 case InstructionType.BMI:
+                    
+                    switch(instruction.Mode)
+                    {
+                        case AddressingModes.Relative:
+                            
+                            if(Flags[FlagType.S].Value == true)
+                            {
+                                ProgramCounter.Value += (short)((sbyte)instruction.Parameters[0]);
+
+                                ProgramCounter.Value = IndexToOffsetMap[OffsetToIndexMap[ProgramCounter.Value] + 1];
+
+                                return ProgramCounter.Value;
+                            }
+                            
+                            break;
+                    }
+
                     break;
+
                 case InstructionType.BNE:
                     break;
                 case InstructionType.BPL:
@@ -155,8 +191,28 @@ namespace _6502Emulator
                     break;
                 case InstructionType.CMP:
                     break;
+
                 case InstructionType.CPX:
+
+                    switch (instruction.Mode)
+                    {
+                        case AddressingModes.Immediate:
+
+                            //A, X, or Y <Memory  --->N = 1, Z = 0, C = 0
+                            //A, X, or Y = Memory---> N = 0, Z = 1, C = 1
+                            //A, X, or Y > Memory---> N = 0, Z = 0, C = 1
+
+                            var compareTo = instruction.Parameters[0];
+
+                            Flags[FlagType.S].Value = (XRegister.Value < compareTo);
+                            Flags[FlagType.Z].Value = (XRegister.Value == compareTo);
+                            Flags[FlagType.C].Value = (XRegister.Value >= compareTo);
+
+                            break;
+                    }
+
                     break;
+                
                 case InstructionType.CPY:
                     break;
                 case InstructionType.DEC:
@@ -169,18 +225,127 @@ namespace _6502Emulator
                     break;
                 case InstructionType.INC:
                     break;
+            
+                //FINISHED
                 case InstructionType.INX:
+
+                    switch (instruction.Mode)
+                    {
+                        case AddressingModes.Implied:
+
+                            var result = XRegister.Value + 1;
+
+                            Flags[FlagType.V].Value = ((sbyte)XRegister.Value).WillAdditionOverflow(1);
+                            Flags[FlagType.S].Value = (result >> 7) == 1; 
+                            
+                            XRegister.Value += 1;
+
+                            break;
+                    }
+
                     break;
+
+                //FINISHED
                 case InstructionType.INY:
+
+                    switch (instruction.Mode)
+                    {
+                        case AddressingModes.Implied:
+
+                            var result = YRegister.Value + 1;
+                            Flags[FlagType.Z].Value = ((sbyte)YRegister.Value).WillAdditionOverflow(1);
+                            Flags[FlagType.S].Value = (result >> 7) == 1;
+
+                            YRegister.Value += 1;
+             
+                            break;
+                    }
+                    
                     break;
+
                 case InstructionType.JMP:
                     break;
+
                 case InstructionType.JSR:
+
+                    switch (instruction.Mode)
+                    {
+                        case AddressingModes.JumpLabel:
+
+                            var lowByte = instruction.Parameters[0];
+                            var highByte = instruction.Parameters[1];
+
+                            short address = (short)((highByte << 8) + lowByte);
+
+                            ProgramCounter.Value = address;
+                            return address;
+                    }
+                    
                     break;
+                
                 case InstructionType.LDA:
+
+                    switch (instruction.Mode)
+                    {
+                        case AddressingModes.Immediate:
+                            {
+                                var value = instruction.Parameters[0];
+                                AccumulatorRegister.Value = value;
+
+                                Flags[FlagType.V].Value = ((sbyte)AccumulatorRegister.Value).WillAdditionOverflow(0);
+                                Flags[FlagType.S].Value = (AccumulatorRegister.Value >> 7) == 1;
+                            }
+                            break;
+                        
+                        case AddressingModes.ZeroPage:
+                            {
+                                var address = instruction.Parameters[0];
+
+                                AccumulatorRegister.Value = Computer.Ram[address].Value;
+
+                                Flags[FlagType.V].Value = ((sbyte)AccumulatorRegister.Value).WillAdditionOverflow(0);
+                                Flags[FlagType.S].Value = (AccumulatorRegister.Value >> 7) == 1;
+                            }
+                            break;
+
+                        case AddressingModes.ZeroPageX:
+                            break;
+                        
+                        case AddressingModes.Absolute:
+                            break;
+                        
+                        case AddressingModes.AbsoluteX:
+                            break;
+                        
+                        case AddressingModes.AbsoluteY:
+                            break;
+                        
+                        case AddressingModes.IndirectX:
+                            break;
+                        
+                        case AddressingModes.IndirectY:
+                            break;
+                    }
+
                     break;
+
                 case InstructionType.LDX:
+                    
+                    switch(instruction.Mode)
+                    {
+                        case AddressingModes.Immediate:
+                            {
+                                var value = instruction.Parameters[0];
+                                XRegister.Value = value;
+
+                                Flags[FlagType.V].Value = ((sbyte)XRegister.Value).WillAdditionOverflow(0);
+                                Flags[FlagType.S].Value = (XRegister.Value >> 7) == 1;
+                            }
+                            break;
+                    }
+                    
                     break;
+
                 case InstructionType.LDY:
                     break;
                 case InstructionType.LSR:
@@ -213,14 +378,92 @@ namespace _6502Emulator
                     break;
                 case InstructionType.SEI:
                     break;
+                
                 case InstructionType.STA:
+
+                    switch (instruction.Mode)
+                    {
+                        case AddressingModes.ZeroPage:
+                            {
+                                var address = instruction.Parameters[0];
+
+                                Computer.Ram[address].Value = AccumulatorRegister.Value;
+                            }
+                            break;
+                        
+                        case AddressingModes.ZeroPageX:
+                            break;
+                        
+                        case AddressingModes.Absolute:
+                            break;
+                        
+                        case AddressingModes.AbsoluteX:
+                            {
+                                var lowByte = instruction.Parameters[0];
+                                var highByte = instruction.Parameters[1];
+
+                                short address = (short)((highByte << 8) + lowByte);
+
+                                var offset = XRegister.Value;
+
+                                Computer.Ram[address + offset].Value = AccumulatorRegister.Value;
+                            }
+                            break;
+                        
+                        case AddressingModes.AbsoluteY:
+                            break;
+                        
+                        case AddressingModes.IndirectX:
+                            break;
+                        
+                        case AddressingModes.IndirectY:
+                            break;
+                    }
+
                     break;
+                
                 case InstructionType.STX:
+
+                    switch (instruction.Mode)
+                    {
+                        case AddressingModes.ZeroPage:
+
+                            var address = instruction.Parameters[0];
+                            Computer.Ram[address].Value = XRegister.Value;
+
+                            ProgramCounter.Value += 3;
+
+                            break;
+                        
+                        case AddressingModes.ZeroPageY:
+                            
+
+
+                            break;
+        
+                        case AddressingModes.Absolute:
+                            
+                            break;
+                    }
+
                     break;
+
                 case InstructionType.STY:
                     break;
+                
                 case InstructionType.TAX:
+
+                    switch (instruction.Mode)
+                    {
+                        case AddressingModes.Implied:
+
+                            XRegister.Value = AccumulatorRegister.Value;
+                            
+                            break;
+                    }
+                    
                     break;
+
                 case InstructionType.TAY:
                     break;
                 case InstructionType.TSX:
@@ -232,6 +475,22 @@ namespace _6502Emulator
                 case InstructionType.TYA:
                     break;
             }
+
+            //If there is a brach or jump we need to return early with a different index
+
+            var newIndex = OffsetToIndexMap[ProgramCounter.Value] + 1;
+
+            if (IndexToOffsetMap.ContainsKey(newIndex) == false)
+            {
+                ;
+                return -1;
+            }
+
+            var newval = IndexToOffsetMap[newIndex];
+
+            ProgramCounter.Value = newval;
+
+            return newval;
         }
     }
 }

@@ -67,12 +67,11 @@
   <ItemGroup>
     <Compile Include="Chip.cs" />
     <Compile Include="Computer.cs" />
+    <Compile Include="FlagData.cs" />
+    <Compile Include="MemoryData.cs" />
     <Compile Include="PropertyChangeTracker.cs" />
     <Compile Include="Enum.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="FancyWrappers\FancyFlag.cs" />
-    <Compile Include="FancyWrappers\FancyMemory.cs" />
-    <Compile Include="FancyWrappers\FancyRegister.cs" />
     <Compile Include="FancyWrappers\PropertyObservationWrapper.cs" />
     <Compile Include="FancyWrappers\INotifyDataChanged.cs" />
     <Compile Include="Form1.cs">
@@ -148,6 +147,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Ram.cs" />
+    <Compile Include="VisualizationClasses\IVisualizeMeAsString.cs" />
     <Compile Include="VisualizationClasses\MappingsHelper.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
@@ -183,6 +183,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="CorrectAssembly.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Fibbanocci.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

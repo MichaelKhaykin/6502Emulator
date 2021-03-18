@@ -47,7 +47,10 @@ namespace _6502Emulator
                 var line = hexdump[i];
                 var split = line.Split(' ');
 
-                var instructionByte = (byte)split[0].ToDecimal();
+                split[0].ToDecimal(out int instruction);
+
+                byte instructionByte = (byte)instruction;
+
                 if (!reversedMap.ContainsKey(instructionByte))
                 {
                     throw new Exception("something went wrong, cannot figure out what instruction this is");
@@ -71,9 +74,9 @@ namespace _6502Emulator
                         //parameter[0] needs to be figured out as positive or negative
                         //take byteoffset + parameter[0] + 2
 
-                        var byteOffset = offsets[i].Substring(1).ToDecimal();
+                        offsets[i].Substring(1).ToDecimal(out int byteOffset);
 
-                        var parameter = split[1].ToDecimal();
+                        split[1].ToDecimal(out int parameter);
                         if (parameter >= 128)
                         {
                             parameter -= 256;

@@ -10,6 +10,7 @@ namespace _6502Emulator
 {
     public class Ram
     {
+
         private PropertyObservationWrapper<byte>[] Memory = new PropertyObservationWrapper<byte>[0xFFFF];
         public ref PropertyObservationWrapper<byte> this[int index] => ref Memory[index];    
     
@@ -17,7 +18,8 @@ namespace _6502Emulator
         {
             for(int i = 0; i < Memory.Length; i++)
             {
-                Memory[i] = new PropertyObservationWrapper<byte>(0, i);
+                Memory[i] = new PropertyObservationWrapper<byte>(0, new MemoryData(i));
+             
                 Memory[i].PropertyChanged += actionToRunOnChange;
             }
         }

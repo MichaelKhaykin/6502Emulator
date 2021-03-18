@@ -11,8 +11,7 @@ namespace _6502Emulator.VisualizationClasses
         public Dictionary<int, int> LineIndexToDissassemblyIndex = new Dictionary<int, int>();
         public Dictionary<int, int> DissassemblyIndexToLineIndex = new Dictionary<int, int>();
         public Dictionary<int, int> LineIndexToLength = new Dictionary<int, int>();
-        public Queue<int> LineIndicies = new Queue<int>();
-
+    
         public MappingsHelper(string[] code)
         {
             var copy = code;
@@ -50,8 +49,6 @@ namespace _6502Emulator.VisualizationClasses
                 if (code.Contains(copy[i].Trim()))
                 {
                     LineIndexToDissassemblyIndex.Add(i, internalCount);
-
-                    LineIndicies.Enqueue(i);
 
                     DissassemblyIndexToLineIndex.Add(internalCount, i);
                     

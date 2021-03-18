@@ -502,7 +502,7 @@ namespace _6502Emulator
                 str = str.Split(',')[0];
             }
 
-            var decimalRepresentation = str.ToDecimal();
+            str.ToDecimal(out int decimalRepresentation);
             if (decimalRepresentation >= Helper.MemorySize) throw new Exception();
 
             byte highByte = Convert.ToByte(decimalRepresentation & 255);

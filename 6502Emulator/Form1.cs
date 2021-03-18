@@ -7,7 +7,9 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -16,45 +18,103 @@ namespace _6502Emulator
 {
     public partial class Form1 : Form
     {
-        PropertyChangeTracker<int, byte> MemoryObserver;
+        PropertyChangeTracker<MemoryData, byte> MemoryObserver;
         PropertyChangeTracker<string, short> ShortRegisterObserver;
         PropertyChangeTracker<string, byte> ByteRegisterObserver;
-
-        Action<FancyFlag, PropertyChangedEventArgs> onFlagChanged;
-        Dictionary<FlagType, bool> flagValues = new Dictionary<FlagType, bool>();
+        PropertyChangeTracker<FlagData, bool> FlagsObserver;
 
         MappingsHelper helper;
 
         Chip chip;
+
+        CheckBox debugInHex;
+
+        string currentFileSelected = "";
+
         public Form1()
         {
             InitializeComponent();
 
-            MemoryObserver = new PropertyChangeTracker<int, byte>();
+            MemoryObserver = new PropertyChangeTracker<MemoryData, byte>();
             ShortRegisterObserver = new PropertyChangeTracker<string, short>();
             ByteRegisterObserver = new PropertyChangeTracker<string, byte>();
-
-            onFlagChanged = new Action<FancyFlag, PropertyChangedEventArgs>((obj, args) =>
-            {
-                if (flagValues.ContainsKey(obj.Type) == false)
-                {
-                    flagValues.Add(obj.Type, obj.HasValue);
-                }
-                flagValues[obj.Type] = obj.HasValue;
-            });
+            FlagsObserver = new PropertyChangeTracker<FlagData, bool>();
 
             Computer.Ram = new Ram(MemoryObserver.OnPropChanged);
-        }
 
+        }
 
         private void Form1_Load(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Maximized;
 
+            fileComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+
+            var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+            string[] files =
+                Directory.GetFiles(path, "*.txt", SearchOption.TopDirectoryOnly);
+
+            fileComboBox.Items.AddRange(files.Select(x => x.Remove(0, path.Length + 1)).ToArray());
+
+            debugInHex = new CheckBox()
+            {
+                Location = new Point(fileComboBox.Location.X, fileComboBox.Bottom),
+                Text = "Display in Hex",
+                Checked = true
+            };
+
+            debugInHex.CheckedChanged += DebugInHex_CheckedChanged;
+            Controls.Add(debugInHex);
+
+            
             Helper.Font = new Font(FontFamily.GenericMonospace, 14);
             codeTextBox.SelectionChanged += codeTextBox_SelectionChanged;
 
             PopulateDescriptions();
+        }
+
+        private void DebugInHex_CheckedChanged(object sender, EventArgs e)
+        {
+            DataGridView view = null;
+            foreach(Control control in Controls)
+            {
+                if(control.Name == "DebugView")
+                {
+                    view = (DataGridView)control;
+                    break;
+                }
+            }
+
+            if (view == null) return;
+
+            var source = (DataTable)view.DataSource;
+
+            for(int i = 0; i < source.Rows.Count; i++)
+            {
+                if(debugInHex.Checked == true)
+                {
+                    var decimalString = (string)source.Rows[i][1];
+
+                    if (int.TryParse(decimalString, out int decimalValue) == false) continue;
+
+                    source.Rows[i][1] = "0x" + Convert.ToString(decimalValue, 16);
+                }
+                else
+                {
+                    var hexValue = (string)source.Rows[i][1];
+
+                    if (hexValue.Contains("0x"))
+                    {
+                        hexValue = hexValue.Substring(2);
+                    }
+
+                    bool worked = hexValue.ToDecimal(out int @decimal);
+                    if (!worked) continue;
+
+                    source.Rows[i][1] = @decimal;
+                }
+            }
         }
 
         private void PopulateDescriptions()
@@ -127,7 +187,12 @@ namespace _6502Emulator
 
             dataGridView1.BackgroundColor = this.BackColor;
 
-            chip = new Chip(ShortRegisterObserver.OnPropChanged, ByteRegisterObserver.OnPropChanged, onFlagChanged, instructions);
+            ShortRegisterObserver.ChangedPropValues.Clear();
+            ByteRegisterObserver.ChangedPropValues.Clear();
+            FlagsObserver.ChangedPropValues.Clear();
+            MemoryObserver.ChangedPropValues.Clear();
+
+            chip = new Chip(ShortRegisterObserver.OnPropChanged, ByteRegisterObserver.OnPropChanged, FlagsObserver.OnPropChanged, instructions);
         }
         private void ResetTextColor()
         {
@@ -196,6 +261,15 @@ namespace _6502Emulator
 
         private void BuildButton_Click(object sender, EventArgs e)
         {
+            for(int i = 0; i < Controls.Count; i++)
+            {
+                if(Controls[i].Tag as string == "RemoveMe")
+                {
+                    Controls.RemoveAt(i);
+                    break;
+                }
+            }
+
             System.IO.File.WriteAllText("temp.txt", codeTextBox.Text);
 
             helper = new MappingsHelper(System.IO.File.ReadAllLines("temp.txt"));
@@ -205,12 +279,18 @@ namespace _6502Emulator
 
         private void BuildFile_Click(object sender, EventArgs e)
         {
-            var lines = System.IO.File.ReadAllLines("6502Code.txt");
+            if (currentFileSelected == "")
+            {
+                MessageBox.Show("Please select a file to build");
+                return;
+            }
+
+            var lines = System.IO.File.ReadAllLines(currentFileSelected);
 
             helper = new MappingsHelper(lines);
 
-            codeTextBox.Text = System.IO.File.ReadAllText("6502Code.txt");
-            Display("6502Code.txt");
+            codeTextBox.Text = System.IO.File.ReadAllText(currentFileSelected);
+            Display(currentFileSelected);
         }
 
         private void codeTextBox_SelectionChanged(object sender, EventArgs e)
@@ -239,11 +319,6 @@ namespace _6502Emulator
                 MessageBox.Show("Please build code first");
                 return;
             }
-            if (helper.LineIndicies.Count == 0)
-            {
-                MessageBox.Show("Program has finished");
-                return;
-            }
 
             for (int i = 0; i < Controls.Count; i++)
             {
@@ -257,7 +332,8 @@ namespace _6502Emulator
             ResetCellColors();
             ResetTextColor();
 
-            var index = helper.LineIndicies.Dequeue();
+            var index = chip.OffsetToIndexMap[chip.ProgramCounter.Value];
+            index = helper.DissassemblyIndexToLineIndex[index];
 
             if (helper.LineIndexToDissassemblyIndex.ContainsKey(index))
             {
@@ -271,7 +347,7 @@ namespace _6502Emulator
             codeTextBox.Select(codeTextBox.GetFirstCharIndexFromLine(index), helper.LineIndexToLength[index]);
             codeTextBox.SelectionColor = Color.Red;
 
-            chip.EmulateSingleInstruction(helper.LineIndexToDissassemblyIndex[index]);
+            chip.EmulateSingleInstruction();
 
             DataTable table = new DataTable();
             table.Columns.Add();
@@ -279,22 +355,30 @@ namespace _6502Emulator
 
             foreach (var memorykvp in MemoryObserver.ChangedPropValues)
             {
-                table.Rows.Add(memorykvp.Key, "0x" + Convert.ToString(memorykvp.Value, 16));
+                var strKey = MemoryObserver.KeyDisplayMethod(memorykvp.Key);
+
+                table.Rows.Add(strKey, "0x" + Convert.ToString(memorykvp.Value, 16));
             }
 
-            foreach (var flagvaluekvp in flagValues)
+            foreach (var flagvaluekvp in FlagsObserver.ChangedPropValues)
             {
-                table.Rows.Add(flagvaluekvp.Key, flagvaluekvp.Value);
+                var strKey = FlagsObserver.KeyDisplayMethod(flagvaluekvp.Key);
+
+                table.Rows.Add(strKey, flagvaluekvp.Value);
             }
 
             foreach (var registershortkvp in ShortRegisterObserver.ChangedPropValues)
             {
-                table.Rows.Add(registershortkvp.Key, "0x" + Convert.ToString(registershortkvp.Value, 16));
+                var strKey = ShortRegisterObserver.KeyDisplayMethod(registershortkvp.Key);
+
+                table.Rows.Add(strKey, "0x" + Convert.ToString(registershortkvp.Value, 16));
             }
 
             foreach (var registerbytekvp in ByteRegisterObserver.ChangedPropValues)
             {
-                table.Rows.Add(registerbytekvp.Key, "0x" + Convert.ToString(registerbytekvp.Value, 16));
+                var strKey = ByteRegisterObserver.KeyDisplayMethod(registerbytekvp.Key);
+
+                table.Rows.Add(strKey, "0x" + Convert.ToString(registerbytekvp.Value, 16));
             }
 
             var newDataGridView = new DataGridView()
@@ -308,6 +392,7 @@ namespace _6502Emulator
                 BorderStyle = BorderStyle.None,
                 CellBorderStyle = DataGridViewCellBorderStyle.None,
                 Tag = "RemoveMe",
+                Name = "DebugView",
                 BackgroundColor = BackColor,
             };
 
@@ -320,6 +405,16 @@ namespace _6502Emulator
             newDataGridView.ClearSelection();
 
             Controls.Add(newDataGridView);
+        }
+
+        private void Update_Tick(object sender, EventArgs e)
+        {
+
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            currentFileSelected = fileComboBox.Text;
         }
     }
 }
