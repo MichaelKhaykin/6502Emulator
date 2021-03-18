@@ -4,6 +4,10 @@ LDA  #1
 STA  $F1    
 LDX  #0
 
+
+
+
+
 LOOP:  
     LDA  $F1
     STA  $0F1B,X

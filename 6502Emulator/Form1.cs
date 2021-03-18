@@ -28,6 +28,7 @@ namespace _6502Emulator
         Chip chip;
 
         CheckBox debugInHex;
+        CheckBox debugMode;
 
         string currentFileSelected = "";
 
@@ -49,29 +50,44 @@ namespace _6502Emulator
             this.WindowState = FormWindowState.Maximized;
 
             fileComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            fileComboBox.FormattingEnabled = true;
 
             var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             string[] files =
-                Directory.GetFiles(path, "*.txt", SearchOption.TopDirectoryOnly);
+                Directory.GetFiles(path, "*.asm", SearchOption.TopDirectoryOnly);
 
             fileComboBox.Items.AddRange(files.Select(x => x.Remove(0, path.Length + 1)).ToArray());
 
             debugInHex = new CheckBox()
             {
-                Location = new Point(fileComboBox.Location.X, fileComboBox.Bottom),
+                Location = new Point(fileComboBox.Right, BuildButton.Location.Y),
                 Text = "Display in Hex",
                 Checked = true
             };
-
             debugInHex.CheckedChanged += DebugInHex_CheckedChanged;
+
+            debugMode = new CheckBox()
+            {
+                Location = new Point(debugInHex.Location.X, debugInHex.Bottom),
+                Text = "Debug",
+                Checked = false,
+            };
+            debugMode.CheckedChanged += DebugMode_CheckedChanged;
+            
             Controls.Add(debugInHex);
+            Controls.Add(debugMode);
 
             
             Helper.Font = new Font(FontFamily.GenericMonospace, 14);
             codeTextBox.SelectionChanged += codeTextBox_SelectionChanged;
 
             PopulateDescriptions();
+        }
+
+        private void DebugMode_CheckedChanged(object sender, EventArgs e)
+        {
+            DebugButton.Visible = debugMode.Checked;
         }
 
         private void DebugInHex_CheckedChanged(object sender, EventArgs e)
@@ -193,6 +209,7 @@ namespace _6502Emulator
             MemoryObserver.ChangedPropValues.Clear();
 
             chip = new Chip(ShortRegisterObserver.OnPropChanged, ByteRegisterObserver.OnPropChanged, FlagsObserver.OnPropChanged, instructions);
+            RunButton.Visible = true;
         }
         private void ResetTextColor()
         {
@@ -258,7 +275,6 @@ namespace _6502Emulator
                     break;
             }
         }
-
         private void BuildButton_Click(object sender, EventArgs e)
         {
             for(int i = 0; i < Controls.Count; i++)
@@ -270,29 +286,14 @@ namespace _6502Emulator
                 }
             }
 
+            fileComboBox.SelectedIndex = -1;
+
             System.IO.File.WriteAllText("temp.txt", codeTextBox.Text);
 
             helper = new MappingsHelper(System.IO.File.ReadAllLines("temp.txt"));
 
             Display("temp.txt");
         }
-
-        private void BuildFile_Click(object sender, EventArgs e)
-        {
-            if (currentFileSelected == "")
-            {
-                MessageBox.Show("Please select a file to build");
-                return;
-            }
-
-            var lines = System.IO.File.ReadAllLines(currentFileSelected);
-
-            helper = new MappingsHelper(lines);
-
-            codeTextBox.Text = System.IO.File.ReadAllText(currentFileSelected);
-            Display(currentFileSelected);
-        }
-
         private void codeTextBox_SelectionChanged(object sender, EventArgs e)
         {
             ResetCellColors();
@@ -311,8 +312,12 @@ namespace _6502Emulator
                 }
             }
         }
-
         private void DebugButton_Click(object sender, EventArgs e)
+        {
+            DebugStep();
+        }
+
+        private void DebugStep()
         {
             if (chip == null)
             {
@@ -406,15 +411,27 @@ namespace _6502Emulator
 
             Controls.Add(newDataGridView);
         }
-
-        private void Update_Tick(object sender, EventArgs e)
-        {
-
-        }
-
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            currentFileSelected = fileComboBox.Text;
+            var currentFileSelected = fileComboBox.Text;
+
+            if (currentFileSelected == "") return;
+
+            var lines = System.IO.File.ReadAllLines(currentFileSelected);
+
+            helper = new MappingsHelper(lines);
+
+            codeTextBox.Text = System.IO.File.ReadAllText(currentFileSelected);
+            Display(currentFileSelected);
+        }
+
+        private void RunButton_Click(object sender, EventArgs e)
+        {
+            while (!chip.Finished)
+            {
+                chip.EmulateSingleInstruction();
+                DebugStep();
+            }
         }
     }
 }

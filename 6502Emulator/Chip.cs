@@ -34,6 +34,8 @@ namespace _6502Emulator
 
         public Dictionary<short, int> OffsetToIndexMap { get; set; } = new Dictionary<short, int>();
         public Dictionary<int, short> IndexToOffsetMap { get; set; } = new Dictionary<int, short>();
+
+        public bool Finished { get; private set; }
         public Chip(Action<PropertyObservationWrapper<short>, PropertyChangedEventArgs> registerActionShort,
                     Action<PropertyObservationWrapper<byte>, PropertyChangedEventArgs> registerActionByte,
                     Action<PropertyObservationWrapper<bool>, PropertyChangedEventArgs> flagChangedAction,
@@ -69,8 +71,10 @@ namespace _6502Emulator
             ProgramCounter.PropertyChanged += registerActionShort;
 
         }
-        public short EmulateSingleInstruction()
+        public void EmulateSingleInstruction()
         {
+            if (Finished) return;
+
             var instruction = instructions[OffsetToIndexMap[ProgramCounter.Value]];
 
             switch (instruction.Type)
@@ -152,20 +156,15 @@ namespace _6502Emulator
                     break;
 
                 case InstructionType.BMI:
-                    
-                    switch(instruction.Mode)
+
+                    switch (instruction.Mode)
                     {
                         case AddressingModes.Relative:
-                            
-                            if(Flags[FlagType.S].Value == true)
+
+                            if (Flags[FlagType.S].Value == true)
                             {
                                 ProgramCounter.Value += (short)((sbyte)instruction.Parameters[0]);
-
-                                ProgramCounter.Value = IndexToOffsetMap[OffsetToIndexMap[ProgramCounter.Value] + 1];
-
-                                return ProgramCounter.Value;
                             }
-                            
                             break;
                     }
 
@@ -212,7 +211,7 @@ namespace _6502Emulator
                     }
 
                     break;
-                
+
                 case InstructionType.CPY:
                     break;
                 case InstructionType.DEC:
@@ -225,7 +224,7 @@ namespace _6502Emulator
                     break;
                 case InstructionType.INC:
                     break;
-            
+
                 //FINISHED
                 case InstructionType.INX:
 
@@ -236,8 +235,8 @@ namespace _6502Emulator
                             var result = XRegister.Value + 1;
 
                             Flags[FlagType.V].Value = ((sbyte)XRegister.Value).WillAdditionOverflow(1);
-                            Flags[FlagType.S].Value = (result >> 7) == 1; 
-                            
+                            Flags[FlagType.S].Value = (result >> 7) == 1;
+
                             XRegister.Value += 1;
 
                             break;
@@ -257,10 +256,10 @@ namespace _6502Emulator
                             Flags[FlagType.S].Value = (result >> 7) == 1;
 
                             YRegister.Value += 1;
-             
+
                             break;
                     }
-                    
+
                     break;
 
                 case InstructionType.JMP:
@@ -278,11 +277,12 @@ namespace _6502Emulator
                             short address = (short)((highByte << 8) + lowByte);
 
                             ProgramCounter.Value = address;
-                            return address;
+
+                            break;
                     }
-                    
+
                     break;
-                
+
                 case InstructionType.LDA:
 
                     switch (instruction.Mode)
@@ -296,7 +296,7 @@ namespace _6502Emulator
                                 Flags[FlagType.S].Value = (AccumulatorRegister.Value >> 7) == 1;
                             }
                             break;
-                        
+
                         case AddressingModes.ZeroPage:
                             {
                                 var address = instruction.Parameters[0];
@@ -310,19 +310,19 @@ namespace _6502Emulator
 
                         case AddressingModes.ZeroPageX:
                             break;
-                        
+
                         case AddressingModes.Absolute:
                             break;
-                        
+
                         case AddressingModes.AbsoluteX:
                             break;
-                        
+
                         case AddressingModes.AbsoluteY:
                             break;
-                        
+
                         case AddressingModes.IndirectX:
                             break;
-                        
+
                         case AddressingModes.IndirectY:
                             break;
                     }
@@ -330,8 +330,8 @@ namespace _6502Emulator
                     break;
 
                 case InstructionType.LDX:
-                    
-                    switch(instruction.Mode)
+
+                    switch (instruction.Mode)
                     {
                         case AddressingModes.Immediate:
                             {
@@ -343,7 +343,7 @@ namespace _6502Emulator
                             }
                             break;
                     }
-                    
+
                     break;
 
                 case InstructionType.LDY:
@@ -378,7 +378,7 @@ namespace _6502Emulator
                     break;
                 case InstructionType.SEI:
                     break;
-                
+
                 case InstructionType.STA:
 
                     switch (instruction.Mode)
@@ -390,13 +390,13 @@ namespace _6502Emulator
                                 Computer.Ram[address].Value = AccumulatorRegister.Value;
                             }
                             break;
-                        
+
                         case AddressingModes.ZeroPageX:
                             break;
-                        
+
                         case AddressingModes.Absolute:
                             break;
-                        
+
                         case AddressingModes.AbsoluteX:
                             {
                                 var lowByte = instruction.Parameters[0];
@@ -409,19 +409,19 @@ namespace _6502Emulator
                                 Computer.Ram[address + offset].Value = AccumulatorRegister.Value;
                             }
                             break;
-                        
+
                         case AddressingModes.AbsoluteY:
                             break;
-                        
+
                         case AddressingModes.IndirectX:
                             break;
-                        
+
                         case AddressingModes.IndirectY:
                             break;
                     }
 
                     break;
-                
+
                 case InstructionType.STX:
 
                     switch (instruction.Mode)
@@ -434,15 +434,15 @@ namespace _6502Emulator
                             ProgramCounter.Value += 3;
 
                             break;
-                        
+
                         case AddressingModes.ZeroPageY:
-                            
+
 
 
                             break;
-        
+
                         case AddressingModes.Absolute:
-                            
+
                             break;
                     }
 
@@ -450,7 +450,7 @@ namespace _6502Emulator
 
                 case InstructionType.STY:
                     break;
-                
+
                 case InstructionType.TAX:
 
                     switch (instruction.Mode)
@@ -458,10 +458,10 @@ namespace _6502Emulator
                         case AddressingModes.Implied:
 
                             XRegister.Value = AccumulatorRegister.Value;
-                            
+
                             break;
                     }
-                    
+
                     break;
 
                 case InstructionType.TAY:
@@ -482,15 +482,13 @@ namespace _6502Emulator
 
             if (IndexToOffsetMap.ContainsKey(newIndex) == false)
             {
-                ;
-                return -1;
+                Finished = true;
+                return;
             }
 
             var newval = IndexToOffsetMap[newIndex];
 
             ProgramCounter.Value = newval;
-
-            return newval;
         }
     }
 }
