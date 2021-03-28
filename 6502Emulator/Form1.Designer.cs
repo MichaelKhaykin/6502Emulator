@@ -28,12 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.codeTextBox = new System.Windows.Forms.RichTextBox();
             this.BuildButton = new System.Windows.Forms.Button();
             this.DebugButton = new System.Windows.Forms.Button();
             this.fileComboBox = new System.Windows.Forms.ComboBox();
             this.RunButton = new System.Windows.Forms.Button();
+            this.ColorTimer = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -100,6 +102,12 @@
             this.RunButton.Visible = false;
             this.RunButton.Click += new System.EventHandler(this.RunButton_Click);
             // 
+            // ColorTimer
+            // 
+            this.ColorTimer.Enabled = true;
+            this.ColorTimer.Interval = 60;
+            this.ColorTimer.Tick += new System.EventHandler(this.ColorTimer_Tick);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -126,6 +134,7 @@
         private System.Windows.Forms.Button DebugButton;
         private System.Windows.Forms.ComboBox fileComboBox;
         private System.Windows.Forms.Button RunButton;
+        private System.Windows.Forms.Timer ColorTimer;
     }
 }
 

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.ComponentModel;
 using _6502Emulator.Instructions;
 using _6502Emulator.FancyWrappers;
+using System.Drawing;
 
 namespace _6502Emulator
 {
@@ -171,7 +172,22 @@ namespace _6502Emulator
                     break;
 
                 case InstructionType.BNE:
+
+                    switch (instruction.Mode)
+                    {
+                        case AddressingModes.Relative:
+
+                            if(Flags[FlagType.Z].Value == false)
+                            {
+                                ProgramCounter.Value += (short)((sbyte)instruction.Parameters[0]);
+                            }
+
+                            break;
+                    }
+                    
+
                     break;
+
                 case InstructionType.BPL:
                     break;
                 case InstructionType.BRK:
@@ -216,8 +232,23 @@ namespace _6502Emulator
                     break;
                 case InstructionType.DEC:
                     break;
+
                 case InstructionType.DEX:
+                
+                    switch(instruction.Mode)
+                    {
+                        case AddressingModes.Implied:
+
+                            Flags[FlagType.S].Value = ((sbyte)XRegister.Value).WillSubtractionUnderflow(1);
+                            Flags[FlagType.Z].Value = XRegister.Value - 1 == 0;
+
+                            XRegister.Value -= 1;
+
+                            break;
+                    }
+                    
                     break;
+                
                 case InstructionType.DEY:
                     break;
                 case InstructionType.EOR:
@@ -275,8 +306,6 @@ namespace _6502Emulator
                             var highByte = instruction.Parameters[1];
 
                             short address = (short)((highByte << 8) + lowByte);
-
-                            ProgramCounter.Value = address;
 
                             break;
                     }
@@ -395,6 +424,28 @@ namespace _6502Emulator
                             break;
 
                         case AddressingModes.Absolute:
+                            {
+                                var lowByte = instruction.Parameters[0];
+                                var highByte = instruction.Parameters[1];
+
+                                short address = (short)((highByte << 8) + lowByte);
+
+                                if (MMIO.AddressToIndex.ContainsKey(address))
+                                {
+                                    var encodedData = AccumulatorRegister.Value;
+                                   
+                                    var red = (encodedData >> 5) * 32;
+                                    var green = ((encodedData & 28) >> 2) * 32;
+                                    var blue = (encodedData & 3) * 64;
+                                    
+                                    var col = Color.FromArgb(255, red, green, blue);
+
+                                    var index = MMIO.AddressToIndex[address];
+                                    var twoDIndex = index.OneToTwoD(MMIO.Bitmap.Width);
+
+                                    MMIO.Bitmap.SetPixel(twoDIndex.X, twoDIndex.Y, col);
+                                }   
+                            }
                             break;
 
                         case AddressingModes.AbsoluteX:
@@ -405,6 +456,24 @@ namespace _6502Emulator
                                 short address = (short)((highByte << 8) + lowByte);
 
                                 var offset = XRegister.Value;
+
+                                short final = (short)(address + offset);
+
+                                if (MMIO.AddressToIndex.ContainsKey(final))
+                                {
+                                    var encodedData = AccumulatorRegister.Value;
+
+                                    var red = (encodedData >> 5) * 32;
+                                    var green = ((encodedData & 28) >> 2) * 32;
+                                    var blue = (encodedData & 3) * 64;
+
+                                    var col = Color.FromArgb(255, red, green, blue);
+
+                                    var index = MMIO.AddressToIndex[final];
+                                    var twoDIndex = index.OneToTwoD(MMIO.Bitmap.Width);
+
+                                    MMIO.Bitmap.SetPixel(twoDIndex.X, twoDIndex.Y, col);
+                                }
 
                                 Computer.Ram[address + offset].Value = AccumulatorRegister.Value;
                             }
@@ -427,12 +496,12 @@ namespace _6502Emulator
                     switch (instruction.Mode)
                     {
                         case AddressingModes.ZeroPage:
+                            {
+                                var address = instruction.Parameters[0];
+                                Computer.Ram[address].Value = XRegister.Value;
 
-                            var address = instruction.Parameters[0];
-                            Computer.Ram[address].Value = XRegister.Value;
-
-                            ProgramCounter.Value += 3;
-
+                                ProgramCounter.Value += 3;
+                            }
                             break;
 
                         case AddressingModes.ZeroPageY:
@@ -442,7 +511,28 @@ namespace _6502Emulator
                             break;
 
                         case AddressingModes.Absolute:
+                            {
+                                var lowByte = instruction.Parameters[0];
+                                var highByte = instruction.Parameters[1];
 
+                                short address = (short)((highByte << 8) + lowByte);
+
+                                if (MMIO.AddressToIndex.ContainsKey(address))
+                                {
+                                    var encodedData = XRegister.Value;
+
+                                    var red = (encodedData >> 5) * 32;
+                                    var green = ((encodedData & 28) >> 2) * 32;
+                                    var blue = (encodedData & 3) * 64;
+
+                                    var col = Color.FromArgb(255, red, green, blue);
+
+                                    var index = MMIO.AddressToIndex[address];
+                                    var twoDIndex = index.OneToTwoD(MMIO.Bitmap.Width);
+
+                                    MMIO.Bitmap.SetPixel(twoDIndex.X, twoDIndex.Y, col);
+                                }
+                            }
                             break;
                     }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -12,9 +13,9 @@ namespace _6502Emulator
         public static bool ToDecimal(this string hexStr, out int x)
         {
             x = 0;
-            for(int i = 0; i < hexStr.Length; i++)
+            for (int i = 0; i < hexStr.Length; i++)
             {
-                if(Helper.HexToIntMap.ContainsKey(hexStr[i]) == false)
+                if (Helper.HexToIntMap.ContainsKey(hexStr[i]) == false)
                 {
                     return false;
                 }
@@ -42,6 +43,10 @@ namespace _6502Emulator
             return hexStr.ToString();
         }
 
+        public static Point OneToTwoD(this int index, int width)
+        {
+            return new Point(index % width, index / width);
+        }
         public static bool WillAdditionOverflow(this sbyte b, int val)
         {
             int @checked = b + val;
@@ -54,7 +59,7 @@ namespace _6502Emulator
             return b - sbyte.MinValue < val;
         }
 
-        private static List<Type> systemTypes = 
+        private static List<Type> systemTypes =
                                   Assembly.GetExecutingAssembly().GetType()
                                   .Module.Assembly.GetExportedTypes().ToList();
         public static bool IsNativeType(this object obj)

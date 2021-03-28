@@ -32,9 +32,34 @@ namespace _6502Emulator
 
         string currentFileSelected = "";
 
+        PictureBox mmioBox;
+
+        ColorWheelControl cw;
+        Label encodedValueLabel;
         public Form1()
         {
             InitializeComponent();
+
+            this.WindowState = FormWindowState.Maximized;
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+            cw = new ColorWheelControl()
+            {
+                Radius = 100,
+                Location = new Point(0, ClientSize.Height - 200),
+            };
+
+
+            encodedValueLabel = new Label()
+            {
+                Location = new Point(cw.Location.X, cw.Location.Y - 20),
+            };
+
+            Controls.Add(cw);
+            Controls.Add(encodedValueLabel);
 
             MemoryObserver = new PropertyChangeTracker<MemoryData, byte>();
             ShortRegisterObserver = new PropertyChangeTracker<string, short>();
@@ -43,11 +68,15 @@ namespace _6502Emulator
 
             Computer.Ram = new Ram(MemoryObserver.OnPropChanged);
 
-        }
+            mmioBox = new PictureBox()
+            {
+                Image = MMIO.ScaledMap(),
+                SizeMode = PictureBoxSizeMode.AutoSize,
+            };
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            this.WindowState = FormWindowState.Maximized;
+            mmioBox.Location = new Point(ClientSize.Width - mmioBox.Width - 50, 0);
+
+            Controls.Add(mmioBox);
 
             fileComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             fileComboBox.FormattingEnabled = true;
@@ -277,6 +306,8 @@ namespace _6502Emulator
         }
         private void BuildButton_Click(object sender, EventArgs e)
         {
+            MMIO.Clear();
+
             for(int i = 0; i < Controls.Count; i++)
             {
                 if(Controls[i].Tag as string == "RemoveMe")
@@ -334,6 +365,12 @@ namespace _6502Emulator
                 }
             }
 
+            Visualize();
+            chip.EmulateSingleInstruction();
+        }
+
+        public void Visualize()
+        {
             ResetCellColors();
             ResetTextColor();
 
@@ -351,8 +388,6 @@ namespace _6502Emulator
 
             codeTextBox.Select(codeTextBox.GetFirstCharIndexFromLine(index), helper.LineIndexToLength[index]);
             codeTextBox.SelectionColor = Color.Red;
-
-            chip.EmulateSingleInstruction();
 
             DataTable table = new DataTable();
             table.Columns.Add();
@@ -409,7 +444,11 @@ namespace _6502Emulator
 
             newDataGridView.ClearSelection();
 
+            mmioBox.Image = MMIO.ScaledMap();
+            mmioBox.Invalidate();
+
             Controls.Add(newDataGridView);
+
         }
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -427,11 +466,29 @@ namespace _6502Emulator
 
         private void RunButton_Click(object sender, EventArgs e)
         {
+            MMIO.Clear();
+
             while (!chip.Finished)
             {
                 chip.EmulateSingleInstruction();
-                DebugStep();
+                //DebugStep();
             }
+
+            Visualize();
+        }
+
+        private void ColorTimer_Tick(object sender, EventArgs e)
+        {
+            encodedValueLabel.Text = $"{Encode(cw.ColorSelected)}";
+        }
+
+        private byte Encode(Color color)
+        {
+            var highbytes = (color.R * 7 / 255) << 5;
+            var midbytest = (color.G * 7 / 255) << 2;
+            var lowbytes = (color.B * 3 / 255);
+
+            return (byte)(highbytes + midbytest + lowbytes);
         }
     }
 }

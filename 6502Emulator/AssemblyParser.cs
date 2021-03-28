@@ -486,10 +486,21 @@ namespace _6502Emulator
         }
         private List<byte> ParseStr(string str, bool ishex)
         {
-            if (str.Length <= 2)
+            if (str.Length <= 3)
             {
                 if (ishex)
                 {
+                    if(str.Length == 3)
+                    {
+                        str.ToDecimal(out int y);
+                        if (y >= Helper.MemorySize) throw new Exception();
+
+                        byte hb = Convert.ToByte(y & 255);
+                        byte lb = Convert.ToByte(y >> 8);
+
+                        return new List<byte>() { hb, lb };
+                    }
+
                     return new List<byte>() { Convert.ToByte(str, 16) };
                 }
                 return new List<byte>() { byte.Parse(str) };
