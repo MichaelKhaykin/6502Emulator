@@ -95,9 +95,8 @@ namespace _6502Emulator
                     byte* data = scan0 + (adjustedX + (adjustedY * rowLength)) * bitsPerPixel / 8;
 
                     double hue = degrees;
-                    double saturation = length / Radius;
-
-                    (byte red, byte green, byte blue) = hsv2rgb(hue, saturation, V);
+                    
+                    (byte red, byte green, byte blue) = hsv2rgb(hue, 1, V);
 
                     byte alpha = (byte)(V * 255);
 
