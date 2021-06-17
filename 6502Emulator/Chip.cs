@@ -88,7 +88,7 @@ namespace _6502Emulator
                             {
                                 byte byteValueToAddToAccumulator = instruction.Parameters[0];
 
-                                byte carryFlag = Flags[FlagType.C].Value ? 1 : 0;
+                                byte carryFlag = Flags[FlagType.C].Value ? (byte)1 : (byte)0;
 
                                 byte result = (byte)(AccumulatorRegister.Value + byteValueToAddToAccumulator + carryFlag);
 
@@ -109,7 +109,7 @@ namespace _6502Emulator
 
                                 byte byteValueToAddToAccumulator = Computer.Ram[address].Value;
 
-                                byte carryFlag = Flags[FlagType.C].Value ? 1 : 0;
+                                byte carryFlag = Flags[FlagType.C].Value ? (byte)1 : (byte)0;
 
                                 byte result = (byte)(AccumulatorRegister.Value + byteValueToAddToAccumulator + carryFlag);
 

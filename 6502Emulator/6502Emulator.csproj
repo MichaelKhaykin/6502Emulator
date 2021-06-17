@@ -192,6 +192,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\tempcursor.png" />
+    <Content Include="BasicMMIO.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Snake.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
