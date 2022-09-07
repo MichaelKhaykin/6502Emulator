@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30503.244
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "6502Emulator", "6502Emulator\6502Emulator.csproj", "{58DF9D55-70DF-4FEF-943B-810E7F5354F4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazor6502EmulatorApp", "Blazor6502EmulatorApp\Blazor6502EmulatorApp.csproj", "{EA654B39-43FF-4656-A033-85DFABBB69CA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{58DF9D55-70DF-4FEF-943B-810E7F5354F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58DF9D55-70DF-4FEF-943B-810E7F5354F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58DF9D55-70DF-4FEF-943B-810E7F5354F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58DF9D55-70DF-4FEF-943B-810E7F5354F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA654B39-43FF-4656-A033-85DFABBB69CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA654B39-43FF-4656-A033-85DFABBB69CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA654B39-43FF-4656-A033-85DFABBB69CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA654B39-43FF-4656-A033-85DFABBB69CA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6DF42DC4-4166-4434-828A-A84A1FB7217F}
+	EndGlobalSection
+EndGlobal
